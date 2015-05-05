@@ -112,7 +112,8 @@ namespace Serilog.Sinks.Raygun
 				raygunMessage.Details.Request = RaygunRequestMessageBuilder.Build(HttpContext.Current.Request, null);
 
             // Submit
-            _client.SendInBackground(raygunMessage);
+          //  _client.SendInBackground(raygunMessage);
+            _client.Send(raygunMessage);
 
         }
     }
