@@ -37,6 +37,7 @@ namespace Serilog
         /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink. By default set to Error as Raygun is mostly used for error reporting.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
         /// <param name="tags">Specifies the tags to include with every log message. The log level will always be included as a tag.</param>
+        /// <param name="ignoredFormFieldNames">Specifies the form field names which to ignore when including request form data.</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration Raygun(
@@ -45,7 +46,8 @@ namespace Serilog
             IEnumerable<Type> wrapperExceptions = null, string userNameProperty = "UserName", string applicationVersionProperty = "ApplicationVersion",
             LogEventLevel restrictedToMinimumLevel = LogEventLevel.Error,
             IFormatProvider formatProvider = null,
-            IEnumerable<string> tags = null)
+            IEnumerable<string> tags = null,
+            IEnumerable<string> ignoredFormFieldNames = null)
         {
             if (loggerConfiguration == null) throw new ArgumentNullException("loggerConfiguration");
 
@@ -53,7 +55,7 @@ namespace Serilog
                 throw new ArgumentNullException("applicationKey");
 
             return loggerConfiguration.Sink(
-                new RaygunSink(formatProvider, applicationKey, wrapperExceptions, userNameProperty, applicationVersionProperty, tags),
+                new RaygunSink(formatProvider, applicationKey, wrapperExceptions, userNameProperty, applicationVersionProperty, tags, ignoredFormFieldNames),
                 restrictedToMinimumLevel);
         }
 

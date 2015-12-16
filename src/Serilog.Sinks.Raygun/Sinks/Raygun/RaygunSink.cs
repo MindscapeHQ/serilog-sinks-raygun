@@ -33,6 +33,7 @@ namespace Serilog.Sinks.Raygun
         readonly string _userNameProperty;
         readonly string _applicationVersionProperty;
         readonly IEnumerable<string> _tags;
+        readonly IEnumerable<string> _ignoredFormFieldNames;
         readonly RaygunClient _client;
 
         /// <summary>
@@ -44,7 +45,14 @@ namespace Serilog.Sinks.Raygun
         /// <param name="userNameProperty">Specifies the property name to read the username from. By default it is UserName. Set to null if you do not want to use this feature.</param>
         /// <param name="applicationVersionProperty">Specifies the property to use to retrieve the application version from. You can use an enricher to add the application version to all the log events. When you specify null, Raygun will use the assembly version.</param>
         /// <param name="tags">Specifies the tags to include with every log message. The log level will always be included as a tag.</param>
-        public RaygunSink(IFormatProvider formatProvider, string applicationKey, IEnumerable<Type> wrapperExceptions = null, string userNameProperty = "UserName", string applicationVersionProperty = "ApplicationVersion", IEnumerable<string> tags = null)
+        /// <param name="ignoredFormFieldNames">Specifies the form field names which to ignore when including request form data.</param>
+        public RaygunSink(IFormatProvider formatProvider, 
+            string applicationKey,
+            IEnumerable<Type> wrapperExceptions = null,
+            string userNameProperty = "UserName",
+            string applicationVersionProperty = "ApplicationVersion",
+            IEnumerable<string> tags = null,
+            IEnumerable<string> ignoredFormFieldNames = null)
         {
             if (string.IsNullOrEmpty(applicationKey))
                 throw new ArgumentNullException("applicationKey");
@@ -53,6 +61,7 @@ namespace Serilog.Sinks.Raygun
             _userNameProperty = userNameProperty;
             _applicationVersionProperty = applicationVersionProperty;
             _tags = tags ?? new string[0];
+            _ignoredFormFieldNames = ignoredFormFieldNames ?? Enumerable.Empty<string>();
 
             _client = new RaygunClient(applicationKey);
             if (wrapperExceptions != null)
@@ -109,12 +118,15 @@ namespace Serilog.Sinks.Raygun
             raygunMessage.Details.MachineName = Environment.MachineName;
           
             if (HttpContext.Current != null)
-				raygunMessage.Details.Request = RaygunRequestMessageBuilder.Build(HttpContext.Current.Request, null);
+            {
+                // Request message is built here instead of raygunClient.Send so RequestMessageOptions have to be constructed here
+                var requestMessageOptions = new RaygunRequestMessageOptions(_ignoredFormFieldNames, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
+                raygunMessage.Details.Request = RaygunRequestMessageBuilder.Build(HttpContext.Current.Request, requestMessageOptions);
+            }
 
             // Submit
-          //  _client.SendInBackground(raygunMessage);
+            //_client.SendInBackground(raygunMessage);
             _client.Send(raygunMessage);
-
         }
     }
 }
