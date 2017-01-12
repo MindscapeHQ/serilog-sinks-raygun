@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -29,12 +30,14 @@ namespace Serilog.Sinks.Raygun
     /// </summary>
     public class RaygunSink : ILogEventSink
     {
-        readonly IFormatProvider _formatProvider;
-        readonly string _userNameProperty;
-        readonly string _applicationVersionProperty;
-        readonly IEnumerable<string> _tags;
-        readonly IEnumerable<string> _ignoredFormFieldNames;
-        readonly RaygunClient _client;
+        private readonly IFormatProvider _formatProvider;
+        private readonly string _userNameProperty;
+        private readonly string _applicationVersionProperty;
+        private readonly IEnumerable<string> _tags;
+        private readonly IEnumerable<string> _ignoredFormFieldNames;
+        private readonly string _groupKeyProperty;
+        private readonly string _tagsProperty;
+        private readonly RaygunClient _client;
 
         /// <summary>
         /// Construct a sink that saves errors to the Raygun.io service. Properties are being send as userdata and the level is included as tag. The message is included inside the userdata.
@@ -46,13 +49,17 @@ namespace Serilog.Sinks.Raygun
         /// <param name="applicationVersionProperty">Specifies the property to use to retrieve the application version from. You can use an enricher to add the application version to all the log events. When you specify null, Raygun will use the assembly version.</param>
         /// <param name="tags">Specifies the tags to include with every log message. The log level will always be included as a tag.</param>
         /// <param name="ignoredFormFieldNames">Specifies the form field names which to ignore when including request form data.</param>
-        public RaygunSink(IFormatProvider formatProvider, 
+        /// <param name="groupKeyProperty">The property containing the custom group key for the Raygun message.</param>
+        /// <param name="tagsProperty">The property where additional tags are stored when emitting log events</param>
+        public RaygunSink(IFormatProvider formatProvider,
             string applicationKey,
             IEnumerable<Type> wrapperExceptions = null,
             string userNameProperty = "UserName",
             string applicationVersionProperty = "ApplicationVersion",
             IEnumerable<string> tags = null,
-            IEnumerable<string> ignoredFormFieldNames = null)
+            IEnumerable<string> ignoredFormFieldNames = null,
+            string groupKeyProperty = "GroupKey",
+            string tagsProperty = "Tags")
         {
             if (string.IsNullOrEmpty(applicationKey))
                 throw new ArgumentNullException("applicationKey");
@@ -62,6 +69,8 @@ namespace Serilog.Sinks.Raygun
             _applicationVersionProperty = applicationVersionProperty;
             _tags = tags ?? new string[0];
             _ignoredFormFieldNames = ignoredFormFieldNames ?? Enumerable.Empty<string>();
+            _groupKeyProperty = groupKeyProperty;
+            _tagsProperty = tagsProperty;
 
             _client = new RaygunClient(applicationKey);
             if (wrapperExceptions != null)
@@ -75,7 +84,7 @@ namespace Serilog.Sinks.Raygun
         public void Emit(LogEvent logEvent)
         {
             //Include the log level as a tag.
-            var tags = _tags.Concat(new []{logEvent.Level.ToString()}).ToList();
+            var tags = _tags.Concat(new[] { logEvent.Level.ToString() }).ToList();
 
             var properties = logEvent.Properties
                          .Select(pv => new { Name = pv.Key, Value = RaygunPropertyFormatter.Simplify(pv.Value) })
@@ -87,13 +96,13 @@ namespace Serilog.Sinks.Raygun
 
             // Create new message
             var raygunMessage = new RaygunMessage
-                                {
-                                    OccurredOn = logEvent.Timestamp.UtcDateTime
-                                };
+            {
+                OccurredOn = logEvent.Timestamp.UtcDateTime
+            };
 
             // Add exception when available
             if (logEvent.Exception != null)
-				raygunMessage.Details.Error = RaygunErrorMessageBuilder.Build(logEvent.Exception);
+                raygunMessage.Details.Error = RaygunErrorMessageBuilder.Build(logEvent.Exception);
 
             // Add user when requested
             if (!String.IsNullOrWhiteSpace(_userNameProperty) &&
@@ -116,7 +125,20 @@ namespace Serilog.Sinks.Raygun
             raygunMessage.Details.Tags = tags;
             raygunMessage.Details.UserCustomData = properties;
             raygunMessage.Details.MachineName = Environment.MachineName;
-          
+
+            // Add the custom group key when provided
+            object customKey;
+            if (properties.TryGetValue(_groupKeyProperty, out customKey))
+                raygunMessage.Details.GroupingKey = customKey.ToString();
+
+            // Add additional custom tags
+            object eventTags;
+            if (properties.TryGetValue(_tagsProperty, out eventTags) && eventTags is object[])
+            {
+                foreach (var tag in (object[])eventTags)
+                    raygunMessage.Details.Tags.Add(tag.ToString());
+            }
+
             if (HttpContext.Current != null)
             {
                 // Request message is built here instead of raygunClient.Send so RequestMessageOptions have to be constructed here
@@ -125,7 +147,6 @@ namespace Serilog.Sinks.Raygun
             }
 
             // Submit
-            //_client.SendInBackground(raygunMessage);
             _client.Send(raygunMessage);
         }
     }
