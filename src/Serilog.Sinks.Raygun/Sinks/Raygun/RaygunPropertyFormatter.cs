@@ -32,7 +32,7 @@ namespace Serilog.Sinks.Raygun
             typeof(byte), typeof(short), typeof(ushort), typeof(int), typeof(uint),
                 typeof(long), typeof(ulong), typeof(float), typeof(double), typeof(decimal),
             typeof(byte[])
-        }; 
+        };
 
         /// <summary>
         /// Simplify the object so as to make handling the serialized
@@ -83,7 +83,7 @@ namespace Serilog.Sinks.Raygun
 
             return null;
         }
-        
+
         static object SimplifyScalar(object value)
         {
             if (value == null) return null;
