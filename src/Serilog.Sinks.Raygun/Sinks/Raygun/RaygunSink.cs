@@ -117,7 +117,7 @@ namespace Serilog.Sinks.Raygun
                 logEvent.Properties.ContainsKey(_applicationVersionProperty) &&
                 logEvent.Properties[_applicationVersionProperty] != null)
             {
-                raygunMessage.Details.Version = logEvent.Properties[_applicationVersionProperty].ToString();
+                raygunMessage.Details.Version = logEvent.Properties[_applicationVersionProperty].ToString("l", null);
             }
 
             // Build up the rest of the message
