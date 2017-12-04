@@ -42,12 +42,10 @@ namespace Serilog.Sinks.Raygun
         /// <returns>A simplified representation.</returns>
         public static object Simplify(LogEventPropertyValue value)
         {
-            var scalar = value as ScalarValue;
-            if (scalar != null)
+            if (value is ScalarValue scalar)
                 return SimplifyScalar(scalar.Value);
 
-            var dict = value as DictionaryValue;
-            if (dict != null)
+            if (value is DictionaryValue dict)
             {
                 var result = new Dictionary<object, object>();
                 foreach (var element in dict.Elements)
@@ -68,12 +66,10 @@ namespace Serilog.Sinks.Raygun
                 return result;
             }
 
-            var seq = value as SequenceValue;
-            if (seq != null)
+            if (value is SequenceValue seq)
                 return seq.Elements.Select(Simplify).ToArray();
 
-            var str = value as StructureValue;
-            if (str != null)
+            if (value is StructureValue str)
             {
                 var props = str.Properties.ToDictionary(p => p.Name, p => Simplify(p.Value));
                 if (str.TypeTag != null)

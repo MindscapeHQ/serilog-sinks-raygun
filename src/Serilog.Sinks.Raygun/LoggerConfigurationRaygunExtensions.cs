@@ -45,7 +45,9 @@ namespace Serilog
         public static LoggerConfiguration Raygun(
             this LoggerSinkConfiguration loggerConfiguration,
             string applicationKey,
-            IEnumerable<Type> wrapperExceptions = null, string userNameProperty = "UserName", string applicationVersionProperty = "ApplicationVersion",
+            IEnumerable<Type> wrapperExceptions = null,
+            string userNameProperty = "UserName",
+            string applicationVersionProperty = "ApplicationVersion",
             LogEventLevel restrictedToMinimumLevel = LogEventLevel.Error,
             IFormatProvider formatProvider = null,
             IEnumerable<string> tags = null,
