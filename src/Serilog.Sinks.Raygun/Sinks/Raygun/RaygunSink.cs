@@ -105,7 +105,7 @@ namespace Serilog.Sinks.Raygun
                 raygunMessage.Details.Error = RaygunErrorMessageBuilder.Build(logEvent.Exception);
 
             // Add user when requested
-            if (!String.IsNullOrWhiteSpace(_userNameProperty) &&
+            if (!string.IsNullOrWhiteSpace(_userNameProperty) &&
                 logEvent.Properties.ContainsKey(_userNameProperty) &&
                 logEvent.Properties[_userNameProperty] != null)
             {
@@ -127,27 +127,22 @@ namespace Serilog.Sinks.Raygun
             raygunMessage.Details.MachineName = Environment.MachineName;
 
             // Add the custom group key when provided
-            object customKey;
-            if (properties.TryGetValue(_groupKeyProperty, out customKey))
+            if (properties.TryGetValue(_groupKeyProperty, out var customKey))
                 raygunMessage.Details.GroupingKey = customKey.ToString();
 
             // Add additional custom tags
-            object eventTags;
-            if (properties.TryGetValue(_tagsProperty, out eventTags) && eventTags is object[])
+            if (properties.TryGetValue(_tagsProperty, out var eventTags) && eventTags is object[])
             {
                 foreach (var tag in (object[])eventTags)
                     raygunMessage.Details.Tags.Add(tag.ToString());
             }
 
-            if (HttpContext.Current != null)
-            {
-                // Request message is built here instead of raygunClient.Send so RequestMessageOptions have to be constructed here
-                var requestMessageOptions = new RaygunRequestMessageOptions(_ignoredFormFieldNames, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
-                raygunMessage.Details.Request = RaygunRequestMessageBuilder.Build(HttpContext.Current.Request, requestMessageOptions);
-            }
-
             // Submit
+#if NETSTANDARD2_0
+            _client.Send(raygunMessage).Wait();
+#else
             _client.Send(raygunMessage);
+#endif
         }
     }
 }
