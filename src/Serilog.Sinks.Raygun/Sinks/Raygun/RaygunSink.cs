@@ -100,9 +100,15 @@ namespace Serilog.Sinks.Raygun
                 OccurredOn = logEvent.Timestamp.UtcDateTime
             };
 
-            // Add exception when available
-            if (logEvent.Exception != null)
-                raygunMessage.Details.Error = RaygunErrorMessageBuilder.Build(logEvent.Exception);
+            // Add exception when available, else use the message template so events can be grouped
+            raygunMessage.Details.Error = logEvent.Exception != null
+                ? RaygunErrorMessageBuilder.Build(logEvent.Exception)
+                : new RaygunErrorMessage()
+                {
+                    ClassName = logEvent.MessageTemplate.Text,
+                    Message = logEvent.ToString(),
+                    Data = logEvent.Properties.ToDictionary(k => k.Key, v => v.Value.ToString())
+                };
 
             // Add user when requested
             if (!string.IsNullOrWhiteSpace(_userNameProperty) &&
