@@ -7,7 +7,7 @@
     <Company>Serilog</Company>
     <Product>Serilog.Sinks.Raygun</Product>
     <Description>Send log events to custom topics in Azure Event Grid</Description>
-    <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>http://serilog.net</PackageProjectUrl>
     <PackageIconUrl>http://serilog.net/images/serilog-sink-nuget.png</PackageIconUrl>
     <RepositoryType>git</RepositoryType>
