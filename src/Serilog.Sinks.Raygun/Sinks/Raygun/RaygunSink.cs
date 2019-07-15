@@ -13,13 +13,15 @@
 // limitations under the License.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using Mindscape.Raygun4Net;
+#if NETSTANDARD2_0
+using Mindscape.Raygun4Net.AspNetCore;
+#else
 using Mindscape.Raygun4Net.Builders;
 using Mindscape.Raygun4Net.Messages;
+#endif
 using Serilog.Core;
 using Serilog.Events;
 
