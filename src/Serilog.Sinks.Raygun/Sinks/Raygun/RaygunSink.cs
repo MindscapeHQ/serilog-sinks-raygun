@@ -107,8 +107,8 @@ namespace Serilog.Sinks.Raygun
                 ? RaygunErrorMessageBuilder.Build(logEvent.Exception)
                 : new RaygunErrorMessage()
                 {
-                    ClassName = logEvent.MessageTemplate.Text,
-                    Message = logEvent.MessageTemplate.Text,     
+                    ClassName = logEvent.RenderMessage(_formatProvider),
+                    Message = logEvent.RenderMessage(_formatProvider),     
                     Data = logEvent.Properties.ToDictionary(k => k.Key, v => v.Value.ToString())
                 };
 
