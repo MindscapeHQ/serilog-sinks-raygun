@@ -13,13 +13,15 @@
 // limitations under the License.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using Mindscape.Raygun4Net;
+#if NETSTANDARD2_0
+using Mindscape.Raygun4Net.AspNetCore;
+#else
 using Mindscape.Raygun4Net.Builders;
 using Mindscape.Raygun4Net.Messages;
+#endif
 using Serilog.Core;
 using Serilog.Events;
 
@@ -100,9 +102,15 @@ namespace Serilog.Sinks.Raygun
                 OccurredOn = logEvent.Timestamp.UtcDateTime
             };
 
-            // Add exception when available
-            if (logEvent.Exception != null)
-                raygunMessage.Details.Error = RaygunErrorMessageBuilder.Build(logEvent.Exception);
+            // Add exception when available, else use the message template so events can be grouped
+            raygunMessage.Details.Error = logEvent.Exception != null
+                ? RaygunErrorMessageBuilder.Build(logEvent.Exception)
+                : new RaygunErrorMessage()
+                {
+                    ClassName = logEvent.MessageTemplate.Text,
+                    Message = logEvent.MessageTemplate.Text,     
+                    Data = logEvent.Properties.ToDictionary(k => k.Key, v => v.Value.ToString())
+                };
 
             // Add user when requested
             if (!string.IsNullOrWhiteSpace(_userNameProperty) &&
@@ -138,11 +146,7 @@ namespace Serilog.Sinks.Raygun
             }
 
             // Submit
-#if NETSTANDARD2_0
-            _client.Send(raygunMessage).Wait();
-#else
-            _client.Send(raygunMessage);
-#endif
+            _client.SendInBackground(raygunMessage);
         }
     }
 }
