@@ -125,6 +125,10 @@ namespace Serilog.Sinks.Raygun
                 if (userInfoScalar != null && userInfoScalar.Value is string)
                 {
                     raygunMessage.Details.User = ParseUserInformation((string)userInfoScalar.Value);
+                    if (raygunMessage.Details.User != null)
+                    {
+                        properties.Remove(_userInfoProperty);
+                    }
                 }
             }
 
