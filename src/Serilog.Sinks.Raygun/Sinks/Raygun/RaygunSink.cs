@@ -53,7 +53,8 @@ namespace Serilog.Sinks.Raygun
         /// <param name="tags">Specifies the tags to include with every log message. The log level will always be included as a tag.</param>
         /// <param name="ignoredFormFieldNames">Specifies the form field names which to ignore when including request form data.</param>
         /// <param name="groupKeyProperty">The property containing the custom group key for the Raygun message.</param>
-        /// <param name="tagsProperty">The property where additional tags are stored when emitting log events</param>
+        /// <param name="tagsProperty">The property where additional tags are stored when emitting log events.</param>
+        /// <param name="userInfoProperty">The property where a RaygunIdentifierMessage with more user information can optionally be provided.</param>
         public RaygunSink(IFormatProvider formatProvider,
             string applicationKey,
             IEnumerable<Type> wrapperExceptions = null,

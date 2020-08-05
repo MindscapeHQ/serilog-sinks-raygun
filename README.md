@@ -18,7 +18,8 @@ Log.Logger = new LoggerConfiguration()
       new[] { "globalTag1", "globalTag2" },
       new[] { "ignoreField1", "ignoreField2" },
       "CustomGroupKeyProperty",
-      "CustomTagsProperty")
+      "CustomTagsProperty",
+	  "CustomUserInfoProperty")
     .CreateLogger();
 ```
 ### Required
@@ -86,4 +87,24 @@ Log.ForContext("CustomGroupKeyProperty", "TransactionId-12345").Error(new Except
 ```csharp
 Log.ForContext("CustomTagsProperty", new[] {"tag1", "tag2"}).Error(new Exception("random error"), "other information");
 Log.Error(new Exception("random error"), "other information {@CustomTagsProperty}", new[] {"tag3", "tag4"});
+```
+
+#### userInfoProperty
+`type: string`
+
+`default: null`
+
+This is null by default, so you need to configure the userInfoProperty name if you want to log more user information in this way. This will cause the RaygunIdentifierMessage to be included in the "User" section of the Raygun payload, allowing the information to be picked up by the "Users" section of the Raygun service. This will not happen if the RaygunIdentifierMessage is destructured into the log message. Sending user information in this way will overwrite the use of the userNameProperty.
+
+The user identifier passed into the RaygunIdentifierMessage constructor could be the users name, email address, database id or whatever works best for you to identify unique users.
+
+```csharp
+var userInfo = new RaygunIdentifierMessage("12345")
+{
+    FirstName = "John",
+    FullName = "John Doe",
+    Email = "johndoe@email.address"
+};
+
+Log.ForContext("CustomUserInfoProperty", userInfo).Error(new Exception("random error"), "other information");
 ```
