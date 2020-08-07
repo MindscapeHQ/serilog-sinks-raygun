@@ -15,6 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Mindscape.Raygun4Net;
 #if NETSTANDARD2_0
 using Mindscape.Raygun4Net.AspNetCore;
@@ -133,6 +134,13 @@ namespace Serilog.Sinks.Raygun
             raygunMessage.Details.Tags = tags;
             raygunMessage.Details.UserCustomData = properties;
             raygunMessage.Details.MachineName = Environment.MachineName;
+            
+            raygunMessage.Details.Client = new RaygunClientMessage()
+            {
+                Name = "RaygunSerilogSink",
+                Version = new AssemblyName(this.GetType().Assembly.FullName).Version.ToString(),
+                ClientUrl = "https://github.com/serilog/serilog-sinks-raygun"
+            };
 
             // Add the custom group key when provided
             if (properties.TryGetValue(_groupKeyProperty, out var customKey))
