@@ -118,6 +118,8 @@ namespace Serilog.Sinks.Raygun
                 logEvent.Properties[_userNameProperty] != null)
             {
                 raygunMessage.Details.User = new RaygunIdentifierMessage(logEvent.Properties[_userNameProperty].ToString());
+
+                properties.Remove(_userNameProperty);
             }
 
             // Add version when requested
@@ -126,24 +128,33 @@ namespace Serilog.Sinks.Raygun
                 logEvent.Properties[_applicationVersionProperty] != null)
             {
                 raygunMessage.Details.Version = logEvent.Properties[_applicationVersionProperty].ToString("l", null);
+
+                properties.Remove(_applicationVersionProperty);
             }
 
             // Build up the rest of the message
             raygunMessage.Details.Environment = new RaygunEnvironmentMessage();
             raygunMessage.Details.Tags = tags;
-            raygunMessage.Details.UserCustomData = properties;
             raygunMessage.Details.MachineName = Environment.MachineName;
 
             // Add the custom group key when provided
             if (properties.TryGetValue(_groupKeyProperty, out var customKey))
+            {
                 raygunMessage.Details.GroupingKey = customKey.ToString();
+
+                properties.Remove(_groupKeyProperty);
+            }
 
             // Add additional custom tags
             if (properties.TryGetValue(_tagsProperty, out var eventTags) && eventTags is object[])
             {
                 foreach (var tag in (object[])eventTags)
                     raygunMessage.Details.Tags.Add(tag.ToString());
+
+                properties.Remove(_tagsProperty);
             }
+
+            raygunMessage.Details.UserCustomData = properties;
 
             // Submit
             _client.SendInBackground(raygunMessage);
