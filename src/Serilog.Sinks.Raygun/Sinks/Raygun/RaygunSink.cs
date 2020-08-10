@@ -134,7 +134,11 @@ namespace Serilog.Sinks.Raygun
             }
 
             // Build up the rest of the message
-            raygunMessage.Details.Environment = new RaygunEnvironmentMessage();
+#if NETSTANDARD2_0
+            raygunMessage.Details.Environment = RaygunEnvironmentMessageBuilder.Build(new RaygunSettings());
+#else
+            raygunMessage.Details.Environment = RaygunEnvironmentMessageBuilder.Build();
+#endif
             raygunMessage.Details.Tags = tags;
             raygunMessage.Details.MachineName = Environment.MachineName;
             
