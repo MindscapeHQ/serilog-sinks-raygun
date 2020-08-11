@@ -19,7 +19,7 @@ Log.Logger = new LoggerConfiguration()
       new[] { "ignoreField1", "ignoreField2" },
       "CustomGroupKeyProperty",
       "CustomTagsProperty",
-	  "CustomUserInfoProperty")
+      "CustomUserInfoProperty")
     .CreateLogger();
 ```
 ### Required
