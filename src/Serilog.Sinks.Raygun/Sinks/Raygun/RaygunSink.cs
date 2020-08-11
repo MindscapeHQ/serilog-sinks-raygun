@@ -121,14 +121,23 @@ namespace Serilog.Sinks.Raygun
                 logEvent.Properties.ContainsKey(_userInfoProperty) &&
                 logEvent.Properties[_userInfoProperty] != null)
             {
-                var userInfoScalar = logEvent.Properties[_userInfoProperty] as ScalarValue;
-                if (userInfoScalar != null && userInfoScalar.Value is string)
+                var userInfoStructure = logEvent.Properties[_userInfoProperty] as StructureValue;
+                if (userInfoStructure != null)
                 {
-                    raygunMessage.Details.User = ParseUserInformation((string)userInfoScalar.Value);
-                    if (raygunMessage.Details.User != null)
+                    raygunMessage.Details.User = BuildUserInformationFromStructureValue(userInfoStructure);
+                }
+                else
+                {
+                    var userInfoScalar = logEvent.Properties[_userInfoProperty] as ScalarValue;
+                    if (userInfoScalar != null && userInfoScalar.Value is string)
                     {
-                        properties.Remove(_userInfoProperty);
+                        raygunMessage.Details.User = ParseUserInformation((string) userInfoScalar.Value);
                     }
+                }
+
+                if (raygunMessage.Details.User != null)
+                {
+                    properties.Remove(_userInfoProperty);
                 }
             }
 
@@ -169,9 +178,42 @@ namespace Serilog.Sinks.Raygun
             _client.SendInBackground(raygunMessage);
         }
 
+        private static RaygunIdentifierMessage BuildUserInformationFromStructureValue(StructureValue userStructure)
+        {
+            RaygunIdentifierMessage userIdentifier = new RaygunIdentifierMessage(null);
+
+            foreach (var property in userStructure.Properties)
+            {
+                ScalarValue scalar = property.Value as ScalarValue;
+                switch (property.Name)
+                {
+                    case nameof(RaygunIdentifierMessage.Identifier):
+                        userIdentifier.Identifier = scalar?.Value != null ? property.Value.ToString("l", null) : null;
+                        break;
+                    case nameof(RaygunIdentifierMessage.IsAnonymous):
+                        userIdentifier.IsAnonymous = "True".Equals(property.Value.ToString());
+                        break;
+                    case nameof(RaygunIdentifierMessage.Email):
+                        userIdentifier.Email = scalar?.Value != null ? property.Value.ToString("l", null) : null;
+                        break;
+                    case nameof(RaygunIdentifierMessage.FullName):
+                        userIdentifier.FullName = scalar?.Value != null ? property.Value.ToString("l", null) : null;
+                        break;
+                    case nameof(RaygunIdentifierMessage.FirstName):
+                        userIdentifier.FirstName = scalar?.Value != null ? property.Value.ToString("l", null) : null;
+                        break;
+                    case nameof(RaygunIdentifierMessage.UUID):
+                        userIdentifier.UUID = scalar?.Value != null ? property.Value.ToString("l", null) : null;
+                        break;
+                }
+            }
+
+            return userIdentifier;
+        }
+
         private static RaygunIdentifierMessage ParseUserInformation(string userInfo)
         {
-            RaygunIdentifierMessage result = null;
+            RaygunIdentifierMessage userIdentifier = null;
 
             // This is a parse of the ToString implementation of RaygunIdentifierMessage which uses the format:
             // [RaygunIdentifierMessage: Identifier=X, IsAnonymous=X, Email=X, FullName=X, FirstName=X, UUID=X]
@@ -181,41 +223,41 @@ namespace Serilog.Sinks.Raygun
                 string[] identifierSplit = properties[0].Split(new[] {'='}, StringSplitOptions.RemoveEmptyEntries);
                 if (identifierSplit.Length == 2)
                 {
-                    result = new RaygunIdentifierMessage(identifierSplit[1]);
+                    userIdentifier = new RaygunIdentifierMessage(identifierSplit[1]);
 
                     string[] isAnonymousSplit = properties[1].Split(new[] {'='}, StringSplitOptions.RemoveEmptyEntries);
                     if (isAnonymousSplit.Length == 2)
                     {
-                        result.IsAnonymous = "True".Equals(isAnonymousSplit[1]);
+                        userIdentifier.IsAnonymous = "True".Equals(isAnonymousSplit[1]);
                     }
 
                     string[] emailSplit = properties[2].Split(new[] {'='}, StringSplitOptions.RemoveEmptyEntries);
                     if (emailSplit.Length == 2)
                     {
-                        result.Email = emailSplit[1];
+                        userIdentifier.Email = emailSplit[1];
                     }
 
                     string[] fullNameSplit = properties[3].Split(new[] {'='}, StringSplitOptions.RemoveEmptyEntries);
                     if (fullNameSplit.Length == 2)
                     {
-                        result.FullName = fullNameSplit[1];
+                        userIdentifier.FullName = fullNameSplit[1];
                     }
 
                     string[] firstNameSplit = properties[4].Split(new[] {'='}, StringSplitOptions.RemoveEmptyEntries);
                     if (firstNameSplit.Length == 2)
                     {
-                        result.FirstName = firstNameSplit[1];
+                        userIdentifier.FirstName = firstNameSplit[1];
                     }
 
                     string[] uuidSplit = properties[5].Split(new[] {'='}, StringSplitOptions.RemoveEmptyEntries);
                     if (uuidSplit.Length == 2)
                     {
-                        result.UUID = uuidSplit[1];
+                        userIdentifier.UUID = uuidSplit[1];
                     }
                 }
             }
 
-            return result;
+            return userIdentifier;
         }
     }
 }
