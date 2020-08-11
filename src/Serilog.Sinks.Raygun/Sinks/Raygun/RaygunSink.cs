@@ -15,6 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Mindscape.Raygun4Net;
 #if NETSTANDARD2_0
 using Mindscape.Raygun4Net.AspNetCore;
@@ -118,6 +119,8 @@ namespace Serilog.Sinks.Raygun
                 logEvent.Properties[_userNameProperty] != null)
             {
                 raygunMessage.Details.User = new RaygunIdentifierMessage(logEvent.Properties[_userNameProperty].ToString());
+
+                properties.Remove(_userNameProperty);
             }
 
             // Add version when requested
@@ -126,24 +129,44 @@ namespace Serilog.Sinks.Raygun
                 logEvent.Properties[_applicationVersionProperty] != null)
             {
                 raygunMessage.Details.Version = logEvent.Properties[_applicationVersionProperty].ToString("l", null);
+
+                properties.Remove(_applicationVersionProperty);
             }
 
             // Build up the rest of the message
-            raygunMessage.Details.Environment = new RaygunEnvironmentMessage();
+#if NETSTANDARD2_0
+            raygunMessage.Details.Environment = RaygunEnvironmentMessageBuilder.Build(new RaygunSettings());
+#else
+            raygunMessage.Details.Environment = RaygunEnvironmentMessageBuilder.Build();
+#endif
             raygunMessage.Details.Tags = tags;
-            raygunMessage.Details.UserCustomData = properties;
             raygunMessage.Details.MachineName = Environment.MachineName;
+            
+            raygunMessage.Details.Client = new RaygunClientMessage()
+            {
+                Name = "RaygunSerilogSink",
+                Version = new AssemblyName(this.GetType().Assembly.FullName).Version.ToString(),
+                ClientUrl = "https://github.com/serilog/serilog-sinks-raygun"
+            };
 
             // Add the custom group key when provided
             if (properties.TryGetValue(_groupKeyProperty, out var customKey))
+            {
                 raygunMessage.Details.GroupingKey = customKey.ToString();
+
+                properties.Remove(_groupKeyProperty);
+            }
 
             // Add additional custom tags
             if (properties.TryGetValue(_tagsProperty, out var eventTags) && eventTags is object[])
             {
                 foreach (var tag in (object[])eventTags)
                     raygunMessage.Details.Tags.Add(tag.ToString());
+
+                properties.Remove(_tagsProperty);
             }
+
+            raygunMessage.Details.UserCustomData = properties;
 
             // Submit
             _client.SendInBackground(raygunMessage);
