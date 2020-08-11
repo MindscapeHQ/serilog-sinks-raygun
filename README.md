@@ -94,7 +94,7 @@ Log.Error(new Exception("random error"), "other information {@CustomTagsProperty
 
 `default: null`
 
-This is null by default, so you need to configure the userInfoProperty name if you want to log more user information in this way. This will cause the RaygunIdentifierMessage to be included in the "User" section of the Raygun payload, allowing the information to be picked up by the "Users" section of the Raygun service. This will not happen if the RaygunIdentifierMessage is destructured into the log message. Sending user information in this way will overwrite the use of the userNameProperty.
+This is null by default, so you need to configure the userInfoProperty name if you want to log more user information in this way. This will cause the provided RaygunIdentifierMessage to be included in the "User" section of the Raygun payload, allowing the information to be picked up by the "Users" section of the Raygun service. It's recommended to destructure the RaygunIdentifierMessage, but this feature will still work if you don't. Sending user information in this way will overwrite the use of the userNameProperty.
 
 The user identifier passed into the RaygunIdentifierMessage constructor could be the users name, email address, database id or whatever works best for you to identify unique users.
 
@@ -106,5 +106,5 @@ var userInfo = new RaygunIdentifierMessage("12345")
     Email = "johndoe@email.address"
 };
 
-Log.ForContext("CustomUserInfoProperty", userInfo).Error(new Exception("random error"), "other information");
+Log.ForContext("CustomUserInfoProperty", userInfo, true).Error(new Exception("random error"), "other information");
 ```
