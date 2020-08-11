@@ -97,7 +97,7 @@ namespace Serilog.Sinks.Raygun
                          .Select(pv => new { Name = pv.Key, Value = RaygunPropertyFormatter.Simplify(pv.Value) })
                          .ToDictionary(a => a.Name, b => b.Value);
 
-            // Add the message 
+            // Add the message
             properties.Add("RenderedLogMessage", logEvent.RenderMessage(_formatProvider));
             properties.Add("LogMessageTemplate", logEvent.MessageTemplate.Text);
 
@@ -170,7 +170,7 @@ namespace Serilog.Sinks.Raygun
 #endif
             raygunMessage.Details.Tags = tags;
             raygunMessage.Details.MachineName = Environment.MachineName;
-            
+
             raygunMessage.Details.Client = new RaygunClientMessage()
             {
                 Name = "RaygunSerilogSink",
