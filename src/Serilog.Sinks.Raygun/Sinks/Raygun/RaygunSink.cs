@@ -119,21 +119,17 @@ namespace Serilog.Sinks.Raygun
 
             // Add user when requested
             if (!string.IsNullOrWhiteSpace(_userInfoProperty) &&
-                logEvent.Properties.ContainsKey(_userInfoProperty) &&
-                logEvent.Properties[_userInfoProperty] != null)
+                logEvent.Properties.TryGetValue(_userInfoProperty, out var userInfoPropertyValue) &&
+                userInfoPropertyValue != null)
             {
-                var userInfoStructure = logEvent.Properties[_userInfoProperty] as StructureValue;
-                if (userInfoStructure != null)
+                switch (userInfoPropertyValue)
                 {
-                    raygunMessage.Details.User = BuildUserInformationFromStructureValue(userInfoStructure);
-                }
-                else
-                {
-                    var userInfoScalar = logEvent.Properties[_userInfoProperty] as ScalarValue;
-                    if (userInfoScalar != null && userInfoScalar.Value is string)
-                    {
-                        raygunMessage.Details.User = ParseUserInformation((string) userInfoScalar.Value);
-                    }
+                    case StructureValue userInfoStructure:
+                        raygunMessage.Details.User = BuildUserInformationFromStructureValue(userInfoStructure);
+                        break;
+                    case ScalarValue userInfoScalar when userInfoScalar.Value is string userInfo:
+                        raygunMessage.Details.User = ParseUserInformation(userInfo);
+                        break;
                 }
 
                 if (raygunMessage.Details.User != null)
