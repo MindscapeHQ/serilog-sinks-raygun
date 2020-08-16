@@ -40,6 +40,7 @@ namespace Serilog.Sinks.Raygun
         readonly IEnumerable<string> _ignoredFormFieldNames;
         readonly string _groupKeyProperty;
         readonly string _tagsProperty;
+        readonly string _userInfoProperty;
         readonly RaygunClient _client;
 
         /// <summary>
@@ -53,7 +54,8 @@ namespace Serilog.Sinks.Raygun
         /// <param name="tags">Specifies the tags to include with every log message. The log level will always be included as a tag.</param>
         /// <param name="ignoredFormFieldNames">Specifies the form field names which to ignore when including request form data.</param>
         /// <param name="groupKeyProperty">The property containing the custom group key for the Raygun message.</param>
-        /// <param name="tagsProperty">The property where additional tags are stored when emitting log events</param>
+        /// <param name="tagsProperty">The property where additional tags are stored when emitting log events.</param>
+        /// <param name="userInfoProperty">The property where a RaygunIdentifierMessage with more user information can optionally be provided.</param>
         public RaygunSink(IFormatProvider formatProvider,
             string applicationKey,
             IEnumerable<Type> wrapperExceptions = null,
@@ -62,7 +64,8 @@ namespace Serilog.Sinks.Raygun
             IEnumerable<string> tags = null,
             IEnumerable<string> ignoredFormFieldNames = null,
             string groupKeyProperty = "GroupKey",
-            string tagsProperty = "Tags")
+            string tagsProperty = "Tags",
+            string userInfoProperty = null)
         {
             if (string.IsNullOrEmpty(applicationKey))
                 throw new ArgumentNullException("applicationKey");
@@ -74,6 +77,7 @@ namespace Serilog.Sinks.Raygun
             _ignoredFormFieldNames = ignoredFormFieldNames ?? Enumerable.Empty<string>();
             _groupKeyProperty = groupKeyProperty;
             _tagsProperty = tagsProperty;
+            _userInfoProperty = userInfoProperty;
 
             _client = new RaygunClient(applicationKey);
             if (wrapperExceptions != null)
@@ -93,7 +97,7 @@ namespace Serilog.Sinks.Raygun
                          .Select(pv => new { Name = pv.Key, Value = RaygunPropertyFormatter.Simplify(pv.Value) })
                          .ToDictionary(a => a.Name, b => b.Value);
 
-            // Add the message 
+            // Add the message
             properties.Add("RenderedLogMessage", logEvent.RenderMessage(_formatProvider));
             properties.Add("LogMessageTemplate", logEvent.MessageTemplate.Text);
 
@@ -109,12 +113,33 @@ namespace Serilog.Sinks.Raygun
                 : new RaygunErrorMessage()
                 {
                     ClassName = logEvent.MessageTemplate.Text,
-                    Message = logEvent.MessageTemplate.Text,     
+                    Message = logEvent.MessageTemplate.Text,
                     Data = logEvent.Properties.ToDictionary(k => k.Key, v => v.Value.ToString())
                 };
 
             // Add user when requested
-            if (!string.IsNullOrWhiteSpace(_userNameProperty) &&
+            if (!string.IsNullOrWhiteSpace(_userInfoProperty) &&
+                logEvent.Properties.TryGetValue(_userInfoProperty, out var userInfoPropertyValue) &&
+                userInfoPropertyValue != null)
+            {
+                switch (userInfoPropertyValue)
+                {
+                    case StructureValue userInfoStructure:
+                        raygunMessage.Details.User = BuildUserInformationFromStructureValue(userInfoStructure);
+                        break;
+                    case ScalarValue userInfoScalar when userInfoScalar.Value is string userInfo:
+                        raygunMessage.Details.User = ParseUserInformation(userInfo);
+                        break;
+                }
+
+                if (raygunMessage.Details.User != null)
+                {
+                    properties.Remove(_userInfoProperty);
+                }
+            }
+
+            if (raygunMessage.Details.User == null &&
+                !string.IsNullOrWhiteSpace(_userNameProperty) &&
                 logEvent.Properties.ContainsKey(_userNameProperty) &&
                 logEvent.Properties[_userNameProperty] != null)
             {
@@ -141,7 +166,7 @@ namespace Serilog.Sinks.Raygun
 #endif
             raygunMessage.Details.Tags = tags;
             raygunMessage.Details.MachineName = Environment.MachineName;
-            
+
             raygunMessage.Details.Client = new RaygunClientMessage()
             {
                 Name = "RaygunSerilogSink",
@@ -170,6 +195,88 @@ namespace Serilog.Sinks.Raygun
 
             // Submit
             _client.SendInBackground(raygunMessage);
+        }
+
+        private static RaygunIdentifierMessage BuildUserInformationFromStructureValue(StructureValue userStructure)
+        {
+            RaygunIdentifierMessage userIdentifier = new RaygunIdentifierMessage(null);
+
+            foreach (var property in userStructure.Properties)
+            {
+                ScalarValue scalar = property.Value as ScalarValue;
+                switch (property.Name)
+                {
+                    case nameof(RaygunIdentifierMessage.Identifier):
+                        userIdentifier.Identifier = scalar?.Value != null ? property.Value.ToString("l", null) : null;
+                        break;
+                    case nameof(RaygunIdentifierMessage.IsAnonymous):
+                        userIdentifier.IsAnonymous = "True".Equals(property.Value.ToString());
+                        break;
+                    case nameof(RaygunIdentifierMessage.Email):
+                        userIdentifier.Email = scalar?.Value != null ? property.Value.ToString("l", null) : null;
+                        break;
+                    case nameof(RaygunIdentifierMessage.FullName):
+                        userIdentifier.FullName = scalar?.Value != null ? property.Value.ToString("l", null) : null;
+                        break;
+                    case nameof(RaygunIdentifierMessage.FirstName):
+                        userIdentifier.FirstName = scalar?.Value != null ? property.Value.ToString("l", null) : null;
+                        break;
+                    case nameof(RaygunIdentifierMessage.UUID):
+                        userIdentifier.UUID = scalar?.Value != null ? property.Value.ToString("l", null) : null;
+                        break;
+                }
+            }
+
+            return userIdentifier;
+        }
+
+        private static RaygunIdentifierMessage ParseUserInformation(string userInfo)
+        {
+            RaygunIdentifierMessage userIdentifier = null;
+
+            // This is a parse of the ToString implementation of RaygunIdentifierMessage which uses the format:
+            // [RaygunIdentifierMessage: Identifier=X, IsAnonymous=X, Email=X, FullName=X, FirstName=X, UUID=X]
+            string[] properties = userInfo.Split(new[] {',', ']'}, StringSplitOptions.RemoveEmptyEntries);
+            if (properties.Length == 6)
+            {
+                string[] identifierSplit = properties[0].Split(new[] {'='}, StringSplitOptions.RemoveEmptyEntries);
+                if (identifierSplit.Length == 2)
+                {
+                    userIdentifier = new RaygunIdentifierMessage(identifierSplit[1]);
+
+                    string[] isAnonymousSplit = properties[1].Split(new[] {'='}, StringSplitOptions.RemoveEmptyEntries);
+                    if (isAnonymousSplit.Length == 2)
+                    {
+                        userIdentifier.IsAnonymous = "True".Equals(isAnonymousSplit[1]);
+                    }
+
+                    string[] emailSplit = properties[2].Split(new[] {'='}, StringSplitOptions.RemoveEmptyEntries);
+                    if (emailSplit.Length == 2)
+                    {
+                        userIdentifier.Email = emailSplit[1];
+                    }
+
+                    string[] fullNameSplit = properties[3].Split(new[] {'='}, StringSplitOptions.RemoveEmptyEntries);
+                    if (fullNameSplit.Length == 2)
+                    {
+                        userIdentifier.FullName = fullNameSplit[1];
+                    }
+
+                    string[] firstNameSplit = properties[4].Split(new[] {'='}, StringSplitOptions.RemoveEmptyEntries);
+                    if (firstNameSplit.Length == 2)
+                    {
+                        userIdentifier.FirstName = firstNameSplit[1];
+                    }
+
+                    string[] uuidSplit = properties[5].Split(new[] {'='}, StringSplitOptions.RemoveEmptyEntries);
+                    if (uuidSplit.Length == 2)
+                    {
+                        userIdentifier.UUID = uuidSplit[1];
+                    }
+                }
+            }
+
+            return userIdentifier;
         }
     }
 }
