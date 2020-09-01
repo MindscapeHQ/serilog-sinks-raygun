@@ -194,7 +194,14 @@ namespace Serilog.Sinks.Raygun
             raygunMessage.Details.UserCustomData = properties;
 
             // Submit
-            _client.SendInBackground(raygunMessage);
+            if (logEvent.Level == LogEventLevel.Fatal)
+            {
+                _client.Send(raygunMessage);
+            }
+            else
+            {
+                _client.SendInBackground(raygunMessage);
+            }
         }
 
         private static RaygunIdentifierMessage BuildUserInformationFromStructureValue(StructureValue userStructure)
@@ -236,39 +243,39 @@ namespace Serilog.Sinks.Raygun
 
             // This is a parse of the ToString implementation of RaygunIdentifierMessage which uses the format:
             // [RaygunIdentifierMessage: Identifier=X, IsAnonymous=X, Email=X, FullName=X, FirstName=X, UUID=X]
-            string[] properties = userInfo.Split(new[] {',', ']'}, StringSplitOptions.RemoveEmptyEntries);
+            string[] properties = userInfo.Split(new[] { ',', ']' }, StringSplitOptions.RemoveEmptyEntries);
             if (properties.Length == 6)
             {
-                string[] identifierSplit = properties[0].Split(new[] {'='}, StringSplitOptions.RemoveEmptyEntries);
+                string[] identifierSplit = properties[0].Split(new[] { '=' }, StringSplitOptions.RemoveEmptyEntries);
                 if (identifierSplit.Length == 2)
                 {
                     userIdentifier = new RaygunIdentifierMessage(identifierSplit[1]);
 
-                    string[] isAnonymousSplit = properties[1].Split(new[] {'='}, StringSplitOptions.RemoveEmptyEntries);
+                    string[] isAnonymousSplit = properties[1].Split(new[] { '=' }, StringSplitOptions.RemoveEmptyEntries);
                     if (isAnonymousSplit.Length == 2)
                     {
                         userIdentifier.IsAnonymous = "True".Equals(isAnonymousSplit[1]);
                     }
 
-                    string[] emailSplit = properties[2].Split(new[] {'='}, StringSplitOptions.RemoveEmptyEntries);
+                    string[] emailSplit = properties[2].Split(new[] { '=' }, StringSplitOptions.RemoveEmptyEntries);
                     if (emailSplit.Length == 2)
                     {
                         userIdentifier.Email = emailSplit[1];
                     }
 
-                    string[] fullNameSplit = properties[3].Split(new[] {'='}, StringSplitOptions.RemoveEmptyEntries);
+                    string[] fullNameSplit = properties[3].Split(new[] { '=' }, StringSplitOptions.RemoveEmptyEntries);
                     if (fullNameSplit.Length == 2)
                     {
                         userIdentifier.FullName = fullNameSplit[1];
                     }
 
-                    string[] firstNameSplit = properties[4].Split(new[] {'='}, StringSplitOptions.RemoveEmptyEntries);
+                    string[] firstNameSplit = properties[4].Split(new[] { '=' }, StringSplitOptions.RemoveEmptyEntries);
                     if (firstNameSplit.Length == 2)
                     {
                         userIdentifier.FirstName = firstNameSplit[1];
                     }
 
-                    string[] uuidSplit = properties[5].Split(new[] {'='}, StringSplitOptions.RemoveEmptyEntries);
+                    string[] uuidSplit = properties[5].Split(new[] { '=' }, StringSplitOptions.RemoveEmptyEntries);
                     if (uuidSplit.Length == 2)
                     {
                         userIdentifier.UUID = uuidSplit[1];
