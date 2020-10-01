@@ -17,7 +17,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using Mindscape.Raygun4Net;
 #if NETSTANDARD2_0
 using Mindscape.Raygun4Net.AspNetCore;
