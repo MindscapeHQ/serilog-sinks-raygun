@@ -6,30 +6,29 @@
     <Authors>Michiel van Oudheusden</Authors>
     <Company>Serilog</Company>
     <Product>Serilog.Sinks.Raygun</Product>
-    <Description>Send log events to custom topics in Azure Event Grid</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>http://serilog.net</PackageProjectUrl>
     <PackageIconUrl>http://serilog.net/images/serilog-sink-nuget.png</PackageIconUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/serilog/serilog-sinks-raygun</RepositoryUrl>
     <PackageTags>serilog sink raygun</PackageTags>
-    <Copyright>Copyright © Serilog Contributors 2017-2019</Copyright>
-    <Description>Serilog event sink that writes to the Raygun.io service.</Description>
+    <Copyright>Copyright © Serilog Contributors 2017-2020</Copyright>
+    <Description>Serilog event sink that writes to the Raygun service.</Description>
     <VersionPrefix>4.0.1</VersionPrefix>
     <AssemblyVersion>4.0.0.0</AssemblyVersion>
     <FileVersion>4.0.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net46'">
-    <PackageReference Include="Mindscape.Raygun4Net" Version="5.5.2" />
+    <PackageReference Include="Mindscape.Raygun4Net" Version="5.12.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
-    <PackageReference Include="Mindscape.Raygun4Net" Version="5.5.2" />
+    <PackageReference Include="Mindscape.Raygun4Net" Version="5.12.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="mindscape.Raygun4Net.AspNetCore" Version="6.0.0" />
+    <PackageReference Include="mindscape.Raygun4Net.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
   <ItemGroup>	
