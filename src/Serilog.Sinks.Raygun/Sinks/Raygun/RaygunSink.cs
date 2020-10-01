@@ -31,7 +31,7 @@ using Serilog.Events;
 namespace Serilog.Sinks.Raygun
 {
     /// <summary>
-    /// Writes log events to the Raygun.com service.
+    /// Writes log events to the Raygun service.
     /// </summary>
     public class RaygunSink : ILogEventSink
     {
@@ -46,10 +46,10 @@ namespace Serilog.Sinks.Raygun
         readonly RaygunClient _client;
 
         /// <summary>
-        /// Construct a sink that saves errors to the Raygun.io service. Properties are being send as userdata and the level is included as tag. The message is included inside the userdata.
+        /// Construct a sink that saves errors to the Raygun service. Properties and the log message are being attached as UserCustomData and the level is included as a Tag.
         /// </summary>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
-        /// <param name="applicationKey">The application key as found on the Raygun website.</param>
+        /// <param name="applicationKey">The application key as found on an application in your Raygun account.</param>
         /// <param name="wrapperExceptions">If you have common outer exceptions that wrap a valuable inner exception which you'd prefer to group by, you can specify these by providing a list.</param>
         /// <param name="userNameProperty">Specifies the property name to read the username from. By default it is UserName. Set to null if you do not want to use this feature.</param>
         /// <param name="applicationVersionProperty">Specifies the property to use to retrieve the application version from. You can use an enricher to add the application version to all the log events. When you specify null, Raygun will use the assembly version.</param>
@@ -92,7 +92,7 @@ namespace Serilog.Sinks.Raygun
         /// <param name="logEvent">The log event to write.</param>
         public void Emit(LogEvent logEvent)
         {
-            //Include the log level as a tag.
+            // Include the log level as a tag.
             var tags = _tags.Concat(new[] { logEvent.Level.ToString() }).ToList();
 
             var properties = logEvent.Properties
