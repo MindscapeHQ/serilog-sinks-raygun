@@ -83,6 +83,8 @@ namespace Serilog.Sinks.Raygun
             _client = new RaygunClient(applicationKey);
             if (wrapperExceptions != null)
                 _client.AddWrapperExceptions(wrapperExceptions.ToArray());
+
+            _client.SendingMessage += OnSendingMessage;
         }
 
         /// <summary>
@@ -160,22 +162,6 @@ namespace Serilog.Sinks.Raygun
                 properties.Remove(_applicationVersionProperty);
             }
 
-            // Build up the rest of the message
-#if NETSTANDARD2_0
-            raygunMessage.Details.Environment = RaygunEnvironmentMessageBuilder.Build(new RaygunSettings());
-#else
-            raygunMessage.Details.Environment = RaygunEnvironmentMessageBuilder.Build();
-#endif
-            raygunMessage.Details.Tags = tags;
-            raygunMessage.Details.MachineName = Environment.MachineName;
-
-            raygunMessage.Details.Client = new RaygunClientMessage()
-            {
-                Name = "RaygunSerilogSink",
-                Version = new AssemblyName(this.GetType().Assembly.FullName).Version.ToString(),
-                ClientUrl = "https://github.com/serilog/serilog-sinks-raygun"
-            };
-
             // Add the custom group key when provided
             if (properties.TryGetValue(_groupKeyProperty, out var customKey))
             {
@@ -187,22 +173,34 @@ namespace Serilog.Sinks.Raygun
             // Add additional custom tags
             if (properties.TryGetValue(_tagsProperty, out var eventTags) && eventTags is object[])
             {
-                foreach (var tag in (object[])eventTags)
-                    raygunMessage.Details.Tags.Add(tag.ToString());
+                tags.AddRange(((object[]) eventTags).Select(t => t.ToString()));
 
                 properties.Remove(_tagsProperty);
             }
 
-            raygunMessage.Details.UserCustomData = properties;
-
             // Submit
             if (logEvent.Level == LogEventLevel.Fatal)
             {
-                _client.Send(raygunMessage);
+                //_client.Send(raygunMessage);
+                _client.Send(logEvent.Exception, tags, properties);
             }
             else
             {
-                _client.SendInBackground(raygunMessage);
+                //_client.SendInBackground(raygunMessage);
+                _client.SendInBackground(logEvent.Exception, tags, properties);
+            }
+        }
+
+        private void OnSendingMessage(object sender, RaygunSendingMessageEventArgs e)
+        {
+            if (e.Message != null)
+            {
+                e.Message.Details.Client = new RaygunClientMessage()
+                {
+                    Name = "RaygunSerilogSink",
+                    Version = new AssemblyName(this.GetType().Assembly.FullName).Version.ToString(),
+                    ClientUrl = "https://github.com/serilog/serilog-sinks-raygun"
+                };
             }
         }
 
