@@ -34,15 +34,18 @@ namespace Serilog.Sinks.Raygun
     /// </summary>
     public class RaygunSink : ILogEventSink
     {
-        readonly IFormatProvider _formatProvider;
-        readonly string _userNameProperty;
-        readonly string _applicationVersionProperty;
-        readonly IEnumerable<string> _tags;
-        readonly IEnumerable<string> _ignoredFormFieldNames;
-        readonly string _groupKeyProperty;
-        readonly string _tagsProperty;
-        readonly string _userInfoProperty;
-        readonly RaygunClient _client;
+        private const string RenderedLogMessageProperty = "RenderedLogMessage";
+        private const string LogMessageTemplateProperty = "LogMessageTemplate";
+
+        private readonly IFormatProvider _formatProvider;
+        private readonly string _userNameProperty;
+        private readonly string _applicationVersionProperty;
+        private readonly IEnumerable<string> _tags;
+        private readonly IEnumerable<string> _ignoredFormFieldNames;
+        private readonly string _groupKeyProperty;
+        private readonly string _tagsProperty;
+        private readonly string _userInfoProperty;
+        private readonly RaygunClient _client;
 
         /// <summary>
         /// Construct a sink that saves errors to the Raygun service. Properties and the log message are being attached as UserCustomData and the level is included as a Tag.
@@ -96,13 +99,11 @@ namespace Serilog.Sinks.Raygun
             // Include the log level as a tag.
             var tags = _tags.Concat(new[] { logEvent.Level.ToString() }).ToList();
 
-            var properties = logEvent.Properties
-                         .Select(pv => new { Name = pv.Key, Value = RaygunPropertyFormatter.Simplify(pv.Value) })
-                         .ToDictionary(a => a.Name, b => b.Value);
+            var properties = logEvent.Properties.ToDictionary(kv => kv.Key, kv => kv.Value);
 
-            // Add the message
-            properties.Add("RenderedLogMessage", logEvent.RenderMessage(_formatProvider));
-            properties.Add("LogMessageTemplate", logEvent.MessageTemplate.Text);
+            // Add the message and template to the properties
+            properties.Add(RenderedLogMessageProperty, new ScalarValue(logEvent.RenderMessage(_formatProvider)));
+            properties.Add(LogMessageTemplateProperty, new ScalarValue(logEvent.MessageTemplate.Text));
 
             // Create new message
             var raygunMessage = new RaygunMessage
@@ -110,70 +111,10 @@ namespace Serilog.Sinks.Raygun
                 OccurredOn = logEvent.Timestamp.UtcDateTime
             };
 
-            // Add exception when available, else use the message template so events can be grouped
-            raygunMessage.Details.Error = logEvent.Exception != null
-                ? RaygunErrorMessageBuilder.Build(logEvent.Exception)
-                : new RaygunErrorMessage()
-                {
-                    ClassName = logEvent.MessageTemplate.Text,
-                    Message = logEvent.RenderMessage(_formatProvider),
-                    Data = logEvent.Properties.ToDictionary(k => k.Key, v => v.Value.ToString()),
-                    StackTrace = RaygunErrorMessageBuilder.BuildStackTrace(new StackTrace())
-                };
-
-            // Add user when requested
-            if (!string.IsNullOrWhiteSpace(_userInfoProperty) &&
-                logEvent.Properties.TryGetValue(_userInfoProperty, out var userInfoPropertyValue) &&
-                userInfoPropertyValue != null)
-            {
-                switch (userInfoPropertyValue)
-                {
-                    case StructureValue userInfoStructure:
-                        raygunMessage.Details.User = BuildUserInformationFromStructureValue(userInfoStructure);
-                        break;
-                    case ScalarValue userInfoScalar when userInfoScalar.Value is string userInfo:
-                        raygunMessage.Details.User = ParseUserInformation(userInfo);
-                        break;
-                }
-
-                if (raygunMessage.Details.User != null)
-                {
-                    properties.Remove(_userInfoProperty);
-                }
-            }
-
-            if (raygunMessage.Details.User == null &&
-                !string.IsNullOrWhiteSpace(_userNameProperty) &&
-                logEvent.Properties.ContainsKey(_userNameProperty) &&
-                logEvent.Properties[_userNameProperty] != null)
-            {
-                raygunMessage.Details.User = new RaygunIdentifierMessage(logEvent.Properties[_userNameProperty].ToString());
-
-                properties.Remove(_userNameProperty);
-            }
-
-            // Add version when requested
-            if (!String.IsNullOrWhiteSpace(_applicationVersionProperty) &&
-                logEvent.Properties.ContainsKey(_applicationVersionProperty) &&
-                logEvent.Properties[_applicationVersionProperty] != null)
-            {
-                raygunMessage.Details.Version = logEvent.Properties[_applicationVersionProperty].ToString("l", null);
-
-                properties.Remove(_applicationVersionProperty);
-            }
-
-            // Add the custom group key when provided
-            if (properties.TryGetValue(_groupKeyProperty, out var customKey))
-            {
-                raygunMessage.Details.GroupingKey = customKey.ToString();
-
-                properties.Remove(_groupKeyProperty);
-            }
-
             // Add additional custom tags
-            if (properties.TryGetValue(_tagsProperty, out var eventTags) && eventTags is object[])
+            if (properties.TryGetValue(_tagsProperty, out var eventTags) && eventTags is SequenceValue tagsSequence)
             {
-                tags.AddRange(((object[]) eventTags).Select(t => t.ToString()));
+                tags.AddRange(tagsSequence.Elements.Select(t => t.ToString("l", null)));
 
                 properties.Remove(_tagsProperty);
             }
@@ -181,26 +122,95 @@ namespace Serilog.Sinks.Raygun
             // Submit
             if (logEvent.Level == LogEventLevel.Fatal)
             {
-                //_client.Send(raygunMessage);
                 _client.Send(logEvent.Exception, tags, properties);
             }
             else
             {
-                //_client.SendInBackground(raygunMessage);
                 _client.SendInBackground(logEvent.Exception, tags, properties);
             }
         }
 
         private void OnSendingMessage(object sender, RaygunSendingMessageEventArgs e)
         {
-            if (e.Message != null)
+            if (e?.Message?.Details != null)
             {
-                e.Message.Details.Client = new RaygunClientMessage()
+                var details = e.Message.Details;
+
+                details.Client = new RaygunClientMessage
                 {
                     Name = "RaygunSerilogSink",
                     Version = new AssemblyName(this.GetType().Assembly.FullName).Version.ToString(),
                     ClientUrl = "https://github.com/serilog/serilog-sinks-raygun"
                 };
+
+                if (details.UserCustomData is Dictionary<string, LogEventPropertyValue> properties)
+                {
+                    // If an Exception has not been provided, then use the log message/template to fill in the details and attach the current execution stack
+                    if (details.Error == null)
+                    {
+                        details.Error = new RaygunErrorMessage
+                        {
+                            ClassName = properties[LogMessageTemplateProperty].ToString("l", null),
+                            Message = properties[RenderedLogMessageProperty].ToString("l", null),
+                            StackTrace = RaygunErrorMessageBuilder.BuildStackTrace(new StackTrace())
+                        };
+                    }
+
+                    // Add user information if provided
+                    if (!string.IsNullOrWhiteSpace(_userInfoProperty) &&
+                        properties.TryGetValue(_userInfoProperty, out var userInfoPropertyValue) &&
+                        userInfoPropertyValue != null)
+                    {
+                        switch (userInfoPropertyValue)
+                        {
+                            case StructureValue userInfoStructure:
+                                details.User = BuildUserInformationFromStructureValue(userInfoStructure);
+                                break;
+                            case ScalarValue userInfoScalar when userInfoScalar.Value is string userInfo:
+                                details.User = ParseUserInformation(userInfo);
+                                break;
+                        }
+
+                        if (details.User != null)
+                        {
+                            details.UserCustomData.Remove(_userInfoProperty);
+                        }
+                    }
+
+                    // If user information is not set, then use the user-name if provided
+                    if (details.User == null &&
+                        !string.IsNullOrWhiteSpace(_userNameProperty) &&
+                        properties.ContainsKey(_userNameProperty) &&
+                        properties[_userNameProperty] != null)
+                    {
+                        details.User = new RaygunIdentifierMessage(properties[_userNameProperty].ToString("l", null));
+
+                        properties.Remove(_userNameProperty);
+                    }
+
+                    // Add version if provided
+                    if (!string.IsNullOrWhiteSpace(_applicationVersionProperty) &&
+                        properties.ContainsKey(_applicationVersionProperty) &&
+                        properties[_applicationVersionProperty] != null)
+                    {
+                        details.Version = properties[_applicationVersionProperty].ToString("l", null);
+
+                        properties.Remove(_applicationVersionProperty);
+                    }
+
+                    // Add the custom group key if provided
+                    if (properties.TryGetValue(_groupKeyProperty, out var customKey))
+                    {
+                        details.GroupingKey = customKey.ToString("l", null);
+
+                        properties.Remove(_groupKeyProperty);
+                    }
+
+                    // Simplify the remaining properties to be used as user-custom-data
+                    details.UserCustomData = properties
+                      .Select(pv => new { Name = pv.Key, Value = RaygunPropertyFormatter.Simplify(pv.Value) })
+                      .ToDictionary(a => a.Name, b => b.Value);
+                }
             }
         }
 
