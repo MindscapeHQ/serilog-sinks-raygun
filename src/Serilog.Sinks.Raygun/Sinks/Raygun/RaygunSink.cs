@@ -42,7 +42,6 @@ namespace Serilog.Sinks.Raygun
         private readonly string _userNameProperty;
         private readonly string _applicationVersionProperty;
         private readonly IEnumerable<string> _tags;
-        private readonly IEnumerable<string> _ignoredFormFieldNames;
         private readonly string _groupKeyProperty;
         private readonly string _tagsProperty;
         private readonly string _userInfoProperty;
@@ -79,7 +78,6 @@ namespace Serilog.Sinks.Raygun
             _userNameProperty = userNameProperty;
             _applicationVersionProperty = applicationVersionProperty;
             _tags = tags ?? new string[0];
-            _ignoredFormFieldNames = ignoredFormFieldNames ?? Enumerable.Empty<string>();
             _groupKeyProperty = groupKeyProperty;
             _tagsProperty = tagsProperty;
             _userInfoProperty = userInfoProperty;
@@ -87,6 +85,9 @@ namespace Serilog.Sinks.Raygun
             _client = new RaygunClient(applicationKey);
             if (wrapperExceptions != null)
                 _client.AddWrapperExceptions(wrapperExceptions.ToArray());
+
+            if(ignoredFormFieldNames != null)
+               _client.IgnoreFormFieldNames(ignoredFormFieldNames.ToArray());
 
             _client.SendingMessage += OnSendingMessage;
         }
