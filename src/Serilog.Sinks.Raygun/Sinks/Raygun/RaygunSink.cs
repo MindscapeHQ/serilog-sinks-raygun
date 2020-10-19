@@ -36,6 +36,7 @@ namespace Serilog.Sinks.Raygun
     {
         private const string RenderedLogMessageProperty = "RenderedLogMessage";
         private const string LogMessageTemplateProperty = "LogMessageTemplate";
+        private const string OccurredProperty = "RaygunSink_OccurredOn";
 
         private readonly IFormatProvider _formatProvider;
         private readonly string _userNameProperty;
@@ -102,14 +103,9 @@ namespace Serilog.Sinks.Raygun
             var properties = logEvent.Properties.ToDictionary(kv => kv.Key, kv => kv.Value);
 
             // Add the message and template to the properties
-            properties.Add(RenderedLogMessageProperty, new ScalarValue(logEvent.RenderMessage(_formatProvider)));
-            properties.Add(LogMessageTemplateProperty, new ScalarValue(logEvent.MessageTemplate.Text));
-
-            // Create new message
-            var raygunMessage = new RaygunMessage
-            {
-                OccurredOn = logEvent.Timestamp.UtcDateTime
-            };
+            properties[RenderedLogMessageProperty] = new ScalarValue(logEvent.RenderMessage(_formatProvider));
+            properties[LogMessageTemplateProperty] = new ScalarValue(logEvent.MessageTemplate.Text);
+            properties[OccurredProperty] = new ScalarValue(logEvent.Timestamp.UtcDateTime);
 
             // Add additional custom tags
             if (properties.TryGetValue(_tagsProperty, out var eventTags) && eventTags is SequenceValue tagsSequence)
@@ -154,6 +150,15 @@ namespace Serilog.Sinks.Raygun
                             Message = properties[RenderedLogMessageProperty].ToString("l", null),
                             StackTrace = RaygunErrorMessageBuilder.BuildStackTrace(new StackTrace())
                         };
+                    }
+
+                    if (properties.TryGetValue(OccurredProperty, out var occurredOnPropertyValue) &&
+                        occurredOnPropertyValue is ScalarValue occurredOnScalar &&
+                        occurredOnScalar.Value is DateTime occurredOn)
+                    {
+                        e.Message.OccurredOn = occurredOn;
+
+                        properties.Remove(OccurredProperty);
                     }
 
                     // Add user information if provided
