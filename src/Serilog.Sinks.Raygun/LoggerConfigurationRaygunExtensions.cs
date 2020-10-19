@@ -58,9 +58,6 @@ namespace Serilog
         {
             if (loggerConfiguration == null) throw new ArgumentNullException("loggerConfiguration");
 
-            if (string.IsNullOrWhiteSpace(applicationKey))
-                throw new ArgumentNullException("applicationKey");
-
             return loggerConfiguration.Sink(
                 new RaygunSink(formatProvider, applicationKey, wrapperExceptions, userNameProperty, applicationVersionProperty, tags, ignoredFormFieldNames, groupKeyProperty, tagsProperty, userInfoProperty),
                 restrictedToMinimumLevel);

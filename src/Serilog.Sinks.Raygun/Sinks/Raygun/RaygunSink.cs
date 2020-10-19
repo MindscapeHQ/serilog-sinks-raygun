@@ -71,9 +71,6 @@ namespace Serilog.Sinks.Raygun
             string tagsProperty = "Tags",
             string userInfoProperty = null)
         {
-            if (string.IsNullOrEmpty(applicationKey))
-                throw new ArgumentNullException("applicationKey");
-
             _formatProvider = formatProvider;
             _userNameProperty = userNameProperty;
             _applicationVersionProperty = applicationVersionProperty;
@@ -82,7 +79,12 @@ namespace Serilog.Sinks.Raygun
             _tagsProperty = tagsProperty;
             _userInfoProperty = userInfoProperty;
 
+#if NETSTANDARD2_0
             _client = new RaygunClient(applicationKey);
+#else
+            _client = string.IsNullOrWhiteSpace(applicationKey) ? new RaygunClient() : new RaygunClient(applicationKey);
+#endif
+
             if (wrapperExceptions != null)
                 _client.AddWrapperExceptions(wrapperExceptions.ToArray());
 
