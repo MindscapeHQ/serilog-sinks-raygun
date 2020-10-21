@@ -108,3 +108,35 @@ var userInfo = new RaygunIdentifierMessage("12345")
 
 Log.ForContext("CustomUserInfoProperty", userInfo, true).Error(new Exception("random error"), "other information");
 ```
+
+## Raygun4Net features
+
+This sink wraps the [Raygun4Net](https://github.com/MindscapeHQ/raygun4net) provider to build a crash report from an Exception and send it to Raygun. This makes the following Raygun4Net features available to you. To use these features, you need to add RaygunSettings to your configuration as explained below which is separate to the Serilog configuration.
+
+*.NET Core*
+
+Add a RaygunSettings block to your appsettings.config file where you can populate the settings that you want to use.
+
+```json
+"RaygunSettings": {
+  "Setting": "Value"
+}
+```
+
+*.NET Framework*
+
+Add the following section within the configSections element of your app.config or web.config file.
+
+```xml
+<section name="RaygunSettings" type="Mindscape.Raygun4Net.RaygunSettings, Mindscape.Raygun4Net"/>
+```
+
+Then add a RaygunSettings element containing the desired settings somewhere within the configuration element of the app.config or web.config file.
+
+```xml
+<RaygunSettings setting="value"/>
+```
+
+### ThrowOnError
+
+This is false by default, which means that any exception that occur within Raygun4Net itself will be silently caught. Setting this to true will allow any exceptions occurring in Raygun4Net to be thrown, which can help debug issues in Raygun4Net if crash reports aren't showing up in Raygun.
