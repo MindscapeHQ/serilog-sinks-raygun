@@ -24,13 +24,19 @@ Log.Logger = new LoggerConfiguration()
 ```
 ### Required
 #### applicationKey
-`string`
+`type: string`
+
+Each application you create in Raygun will have an API Key which you can pass in here to specify where the crash reports will be sent to. Although this is required, you can set this to null or empty string which would result in crash reports not being sent. This can be useful if you want to configure your local environment to not send crash reports to Raygun and then use config transforms or the like to provide an API key for other environments.
 
 ### Optional
 #### wrapperExceptions
-`type: IEnumerable<Exception>`
+`type: IEnumerable<Type>`
 
 `default: null`
+
+This is a list of wrapper exception types that you're not interested in logging to Raygun. Whenever an undesired wrapper exception is logged, it will be discarded and only the inner exception(s) will be logged.
+
+For example, you may not be interested in the details of an AggregateException, so you could include typeof(AggregateException) in this list of wrapperExceptions. All inner exceptions of any logged AggregateException will be sent to Raygun as separate crash reports.
 
 #### userNameProperty
 `type: string`
@@ -65,10 +71,18 @@ Log.ForContext("CustomAppVersionProperty", "1.2.11").Error(new Exception("random
 
 `default: null`
 
+This is a list of global tags that will be included on every crash report sent with this Serilog sink.
+
 #### ignoredFormFieldNames
 `type: IEnumerable<string>`
 
 `default: null`
+
+Crash reports sent to Raygun from this Serilog sink will include HTTP context details where present. (Currently only supported in .NET Framework applications). This option lets you specify a list of form fields that you do not want to be sent to Raygun.
+
+Setting ignoredFormFieldNames to a list that only contains "*" will cause no form fields to be sent to Raygun. Placing * before, after or at both ends of an entry will perform an ends-with, starts-with or contains operation respectively.
+
+Note that HTTP headers, query parameters, cookies, server variables and raw request data can also be filtered out. Configuration to do so is described in the RaygunSettings section further below.
 
 #### groupKeyProperty
 `type: string`
@@ -83,6 +97,8 @@ Log.ForContext("CustomGroupKeyProperty", "TransactionId-12345").Error(new Except
 `type: string`
 
 `default: Tags`
+
+This allows you to specify a key in the properties collection that contains a list of tags to include on crash reports. Note that these will be included in addition to any global tags (describe above). If you set a list of tags in the properties collection multiple times (e.g. at different logging scopes) then only the latest list of tags will be used.
 
 ```csharp
 Log.ForContext("CustomTagsProperty", new[] {"tag1", "tag2"}).Error(new Exception("random error"), "other information");
@@ -109,21 +125,21 @@ var userInfo = new RaygunIdentifierMessage("12345")
 Log.ForContext("CustomUserInfoProperty", userInfo, true).Error(new Exception("random error"), "other information");
 ```
 
-## Raygun4Net features
+## Raygun4Net features configured via RaygunSettings
 
 This sink wraps the [Raygun4Net](https://github.com/MindscapeHQ/raygun4net) provider to build a crash report from an Exception and send it to Raygun. This makes the following Raygun4Net features available to you. To use these features, you need to add RaygunSettings to your configuration as explained below which is separate to the Serilog configuration.
 
-*.NET Core*
+**.NET Core**
 
 Add a RaygunSettings block to your appsettings.config file where you can populate the settings that you want to use.
 
-```json
+```
 "RaygunSettings": {
   "Setting": "Value"
 }
 ```
 
-*.NET Framework*
+**.NET Framework**
 
 Add the following section within the configSections element of your app.config or web.config file.
 
@@ -139,4 +155,13 @@ Then add a RaygunSettings element containing the desired settings somewhere with
 
 ### ThrowOnError
 
-This is false by default, which means that any exception that occur within Raygun4Net itself will be silently caught. Setting this to true will allow any exceptions occurring in Raygun4Net to be thrown, which can help debug issues in Raygun4Net if crash reports aren't showing up in Raygun.
+This is false by default, which means that any exception that occur within Raygun4Net itself will be silently caught. Setting this to true will allow any exceptions occurring in Raygun4Net to be thrown, which can help debug issues with Raygun4Net if crash reports aren't showing up in Raygun.
+
+### IgnoreSensitiveFieldNames
+
+Crash reports sent to Raygun from this Serilog sink will include HTTP context details where present. (Currently only supported in .NET Framework applications). IgnoreSensitiveFieldNames lets you specify a list of HTTP query parameters, form fields, headers, cookies and server variables that you do not want to be sent to Raygun.
+
+Setting IgnoreSensitiveFieldNames to a list that only contains "*" will cause none of these things to be sent to Raygun. Placing * before, after or at both ends of an entry will perform an ends-with, starts-with or contains operation respectively.
+
+Individual options are also available which function in the same way as IgnoreSensitiveFieldNames: IgnoreQueryParameterNames, IgnoreFormFieldNames, IgnoreHeaderNames, IgnoreCookieNames and IgnoreServerVariableNames.
+
