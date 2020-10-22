@@ -82,7 +82,7 @@ Crash reports sent to Raygun from this Serilog sink will include HTTP context de
 
 Setting ignoredFormFieldNames to a list that only contains "*" will cause no form fields to be sent to Raygun. Placing * before, after or at both ends of an entry will perform an ends-with, starts-with or contains operation respectively.
 
-Note that HTTP headers, query parameters, cookies, server variables and raw request data can also be filtered out. Configuration to do so is described in the RaygunSettings section further below.
+Note that HTTP headers, query parameters, cookies, server variables and raw request data can also be filtered out. Configuration to do so is described in the [RaygunSettings](#raygun4net-features-configured-via-raygunsettings) section further below.
 
 #### groupKeyProperty
 `type: string`
@@ -159,9 +159,22 @@ This is false by default, which means that any exception that occur within Raygu
 
 ### IgnoreSensitiveFieldNames
 
-Crash reports sent to Raygun from this Serilog sink will include HTTP context details where present. (Currently only supported in .NET Framework applications). IgnoreSensitiveFieldNames lets you specify a list of HTTP query parameters, form fields, headers, cookies and server variables that you do not want to be sent to Raygun.
+Crash reports sent to Raygun from this Serilog sink will include HTTP context details where present. (Currently only supported in .NET Framework applications). IgnoreSensitiveFieldNames lets you specify a list of HTTP query parameters, form fields, headers, cookies and server variables that you do not want to be sent to Raygun. Additionally, entries to this setting will be attempted to be stripped out of the raw request payload (more options for controlling this are listed below)
 
 Setting IgnoreSensitiveFieldNames to a list that only contains "*" will cause none of these things to be sent to Raygun. Placing * before, after or at both ends of an entry will perform an ends-with, starts-with or contains operation respectively.
 
 Individual options are also available which function in the same way as IgnoreSensitiveFieldNames: IgnoreQueryParameterNames, IgnoreFormFieldNames, IgnoreHeaderNames, IgnoreCookieNames and IgnoreServerVariableNames.
 
+The IgnoreFormFieldNames entries will also strip out specified values from the raw request payload if it is multipart/form-data.
+
+### IsRawDataIgnored
+
+By default, Raygun crash reports will capture the raw request payload of the current HTTP context if present. If you would not like to include raw request payloads on crash reports sent to Raygun, then you can set IsRawDataIgnored to true.
+
+If you do want to include the raw request payload, but want to filter out sensitive fields, then you can use the IgnoreSensitiveFieldNames options described above. You'll also need to specify how the fields should be stripped from the raw request payload. Set UseXmlRawDataFilter to true for XML payloads or/and set UseKeyValuePairRawDataFilter to true for payloads of the format "key1=value1&key2=value2".
+
+Setting IsRawDataIgnoredWhenFilteringFailed to true will cause the entire raw request payload to be ignored in cases where specified sensitive values fail to be stripped out.
+
+### CrashReportingOfflineStorageEnabled
+
+Only available in .NET Framework applications. This is true by default which will cause crash reports to be saved to isolated storage (if possible) in cases where they fail to be sent to Raygun. This option lets you disable this functionality by setting it to false. When enabled, a maximum of 64 crash reports can be saved. This limit can be set lower than 64 via the MaxCrashReportsStoredOffline option.
