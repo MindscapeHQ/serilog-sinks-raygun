@@ -85,6 +85,9 @@ namespace Serilog.Sinks.Raygun
             _client = string.IsNullOrWhiteSpace(applicationKey) ? new RaygunClient() : new RaygunClient(applicationKey);
 #endif
 
+            // Raygun4Net adds these two wrapper exceptions by default, but as there is no way to remove them through this Serilog sink, we replace them entirely with the configured wrapper exceptions.
+            _client.RemoveWrapperExceptions(typeof(TargetInvocationException), Type.GetType("System.Web.HttpUnhandledException, System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"));
+
             if (wrapperExceptions != null)
                 _client.AddWrapperExceptions(wrapperExceptions.ToArray());
 
