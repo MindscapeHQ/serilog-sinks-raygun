@@ -37,7 +37,7 @@ Each application you create in Raygun will have an API Key which you can pass in
 
 This is a list of wrapper exception types that you're not interested in logging to Raygun. Whenever an undesired wrapper exception is logged, it will be discarded and only the inner exception(s) will be logged.
 
-For example, you may not be interested in the details of an AggregateException, so you could include typeof(AggregateException) in this list of wrapperExceptions. All inner exceptions of any logged AggregateException will be sent to Raygun as separate crash reports.
+For example, you may not be interested in the details of an AggregateException, so you could include `typeof(AggregateException)` in this list of wrapperExceptions. All inner exceptions of any logged AggregateException would then be sent to Raygun as separate crash reports.
 
 ### userNameProperty
 `type: string`
@@ -79,7 +79,7 @@ This is a list of global tags that will be included on every crash report sent w
 
 `default: null`
 
-Crash reports sent to Raygun from this Serilog sink will include HTTP context details where present. (Currently only supported in .NET Framework applications). This option lets you specify a list of form fields that you do not want to be sent to Raygun.
+Crash reports sent to Raygun from this Serilog sink will include HTTP context details if present. (Currently only supported in .NET Framework applications). This option lets you specify a list of form fields that you do not want to be sent to Raygun.
 
 Setting `ignoredFormFieldNames` to a list that only contains "*" will cause no form fields to be sent to Raygun. Placing * before, after or at both ends of an entry will perform an ends-with, starts-with or contains operation respectively.
 
@@ -92,7 +92,7 @@ The `ignoreFormFieldNames` entries will also strip out specified values from the
 
 `default: GroupKey`
 
-Crash reports sent to Raygun will be grouped together based on stack trace and exception type information. The `groupKeyProperty` setting specifies a key in the logging properties collection where you can provide a grouping key. Crash reports containing a grouping key will not be grouped automatically by Raygun. Instead, crash reports with matching custom grouping keys will be grouped together.
+Crash reports sent to Raygun will be automatically grouped together based on stack trace and exception type information. The `groupKeyProperty` setting specifies a key in the logging properties collection where you can provide a grouping key. Crash reports containing a grouping key will not be grouped automatically by Raygun. Instead, crash reports with matching custom grouping keys will be grouped together.
 
 ```csharp
 Log.ForContext("CustomGroupKeyProperty", "TransactionId-12345").Error(new Exception("random error"), "other information");
@@ -103,7 +103,7 @@ Log.ForContext("CustomGroupKeyProperty", "TransactionId-12345").Error(new Except
 
 `default: Tags`
 
-This allows you to specify a key in the properties collection that contains a list of tags to include on crash reports. Note that these will be included in addition to any global tags (describe above). If you set a list of tags in the properties collection multiple times (e.g. at different logging scopes) then only the latest list of tags will be used.
+This allows you to specify a key in the properties collection that contains a list of tags to include on crash reports. Note that these will be included in addition to any global tags [described above](#tags). If you set a list of tags in the properties collection multiple times (e.g. at different logging scopes) then only the latest list of tags will be used.
 
 ```csharp
 Log.ForContext("CustomTagsProperty", new[] {"tag1", "tag2"}).Error(new Exception("random error"), "other information");
@@ -170,7 +170,7 @@ This is false by default, which means that any exception that occur within Raygu
 
 `default: null`
 
-Crash reports sent to Raygun from this Serilog sink will include HTTP context details if present. (Currently only supported in .NET Framework applications). IgnoreSensitiveFieldNames lets you specify a list of HTTP query parameters, form fields, headers, cookies and server variables that you do not want to be sent to Raygun. Additionally, entries in this setting will be attempted to be stripped out of the raw request payload (more options for controlling this are explained in the [IsRawDataIgnored](#israwdataignored) section below).
+Crash reports sent to Raygun from this Serilog sink will include HTTP context details if present. (Currently only supported in .NET Framework applications). `IgnoreSensitiveFieldNames` lets you specify a list of HTTP query parameters, form fields, headers, cookies and server variables that you do not want to be sent to Raygun. Additionally, entries in this setting will be attempted to be stripped out of the raw request payload (more options for controlling this are explained in the `IsRawDataIgnored` section below).
 
 Setting `IgnoreSensitiveFieldNames` to a list that only contains "*" will cause none of these things to be sent to Raygun. Placing * before, after or at both ends of an entry will perform an ends-with, starts-with or contains operation respectively.
 
@@ -185,7 +185,7 @@ The `IgnoreFormFieldNames` entries will also strip out specified values from the
 
 By default, Raygun crash reports will capture the raw request payload of the current HTTP context if present. (Currently only supported in .NET Framework applications). If you would not like to include raw request payloads on crash reports sent to Raygun, then you can set `IsRawDataIgnored` to true.
 
-If you do want to include the raw request payload, but want to filter out sensitive fields, then you can use the `IgnoreSensitiveFieldNames` options [described above](#ignoresensitivefieldnames). You'll also need to specify how the fields should be stripped from the raw request payload. Set `UseXmlRawDataFilter` to true for XML payloads or/and set `UseKeyValuePairRawDataFilter` to true for payloads of the format "key1=value1&key2=value2".
+If you do want to include the raw request payload, but want to filter out sensitive fields, then you can use the `IgnoreSensitiveFieldNames` options described above. You'll also need to specify how the fields should be stripped from the raw request payload. Set `UseXmlRawDataFilter` to true for XML payloads or/and set `UseKeyValuePairRawDataFilter` to true for payloads of the format "key1=value1&key2=value2".
 
 Setting `IsRawDataIgnoredWhenFilteringFailed` to true will cause the entire raw request payload to be ignored in cases where specified sensitive values fail to be stripped out.
 
