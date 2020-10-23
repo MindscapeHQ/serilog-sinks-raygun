@@ -53,6 +53,10 @@ Log.ForContext("CustomUserNameProperty", "John Doe").Error(new Exception("random
 
 `default: ApplicationVersion`
 
+By default, crash reports sent to Raygun will have an ApplicationVersion field based on the version of the entry assembly for your application. If this is not being picked up correctly, or if you want to provide a different version, then you can do so by including the desired value in the logging properties collection.
+
+You can specify the property key that you place the version in by using this applicationVersionProperty setting. Otherwise the version will be read from the "ApplicationVersion" key.
+
 ```csharp
 Log.ForContext("CustomAppVersionProperty", "1.2.11").Error(new Exception("random error"), "other information");
 ```
