@@ -26,11 +26,11 @@ namespace Serilog
     public static class LoggerConfigurationRaygunExtensions
     {
         /// <summary>
-        /// Adds a sink that writes log events (defaults to error and up) to the Raygun.io webservice. Properties are being send as data and the level is used as a tag.
+        /// Adds a sink that writes log events (defaults to error and up) to the Raygun service. Properties and the log message are being attached as UserCustomData and the level is included as a Tag.
         /// Your message is part of the custom data.
         /// </summary>
         /// <param name="loggerConfiguration">The logger configuration.</param>
-        /// <param name="applicationKey">The application key as found on the Raygun.io website.</param>
+        /// <param name="applicationKey">The application key as found on an application in your Raygun account.</param>
         /// <param name="wrapperExceptions">If you have common outer exceptions that wrap a valuable inner exception which you'd prefer to group by, you can specify these by providing a list.</param>
         /// <param name="userNameProperty">Specifies the property name to read the username from. By default it is UserName. Set to null if you do not want to use this feature.</param>
         /// <param name="applicationVersionProperty">Specifies the property to use to retrieve the application version from. You can use an enricher to add the application version to all the log events. When you specify null, Raygun will use the assembly version.</param> 
@@ -53,15 +53,13 @@ namespace Serilog
             IEnumerable<string> tags = null,
             IEnumerable<string> ignoredFormFieldNames = null,
             string groupKeyProperty = "GroupKey",
-            string tagsProperty = "Tags")
+            string tagsProperty = "Tags",
+            string userInfoProperty = null)
         {
             if (loggerConfiguration == null) throw new ArgumentNullException("loggerConfiguration");
 
-            if (string.IsNullOrWhiteSpace(applicationKey))
-                throw new ArgumentNullException("applicationKey");
-
             return loggerConfiguration.Sink(
-                new RaygunSink(formatProvider, applicationKey, wrapperExceptions, userNameProperty, applicationVersionProperty, tags, ignoredFormFieldNames, groupKeyProperty, tagsProperty),
+                new RaygunSink(formatProvider, applicationKey, wrapperExceptions, userNameProperty, applicationVersionProperty, tags, ignoredFormFieldNames, groupKeyProperty, tagsProperty, userInfoProperty),
                 restrictedToMinimumLevel);
         }
     }
