@@ -125,11 +125,11 @@ namespace Serilog.Sinks.Raygun
             // Submit
             if (logEvent.Level == LogEventLevel.Fatal)
             {
-                _client.Send(logEvent.Exception ?? new NullException(new StackTrace()), tags, properties);
+                _client.Send(logEvent.Exception ?? new NullException(GetCurrentExecutionStackTrace()), tags, properties);
             }
             else
             {
-                _client.SendInBackground(logEvent.Exception ?? new NullException(new StackTrace()), tags, properties);
+                _client.SendInBackground(logEvent.Exception ?? new NullException(GetCurrentExecutionStackTrace()), tags, properties);
             }
         }
 
@@ -224,6 +224,24 @@ namespace Serilog.Sinks.Raygun
                       .ToDictionary(a => a.Name, b => b.Value);
                 }
             }
+        }
+
+        private static StackTrace GetCurrentExecutionStackTrace()
+        {
+          StackTrace stackTrace = new StackTrace();
+
+          for (int frameIndex = 0; frameIndex < stackTrace.FrameCount; frameIndex++)
+          {
+            MethodBase method = stackTrace.GetFrame(frameIndex).GetMethod();
+            string className = method?.ReflectedType?.FullName ?? "";
+
+            if (!className.StartsWith("Serilog."))
+            {
+              return new StackTrace(frameIndex);
+            }
+          }
+
+          return stackTrace;
         }
 
         private static RaygunIdentifierMessage BuildUserInformationFromStructureValue(StructureValue userStructure)
