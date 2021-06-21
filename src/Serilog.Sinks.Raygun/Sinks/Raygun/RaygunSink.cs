@@ -155,7 +155,7 @@ namespace Serilog.Sinks.Raygun
                         {
                             ClassName = properties[LogMessageTemplateProperty].ToString("l", null),
                             Message = properties[RenderedLogMessageProperty].ToString("l", null),
-                            StackTrace = RaygunErrorMessageBuilder.BuildStackTrace(nullException.StackTrace)
+                            StackTrace = RaygunErrorMessageBuilder.BuildStackTrace(nullException.CodeExecutionStackTrace)
                         };
                     }
 
