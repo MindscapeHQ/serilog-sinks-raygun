@@ -13,7 +13,7 @@ namespace Serilog.Sinks.Raygun.Sinks.Raygun
             _stackTrace = stacktrace;
         }
 
-        public StackTrace StackTrace
+        public StackTrace CodeExecutionStackTrace
         {
             get { return _stackTrace; }
         }
