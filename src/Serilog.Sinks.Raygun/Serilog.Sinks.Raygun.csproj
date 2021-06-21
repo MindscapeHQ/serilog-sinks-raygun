@@ -15,6 +15,7 @@
     <Copyright>Copyright © Serilog Contributors 2017-2020</Copyright>
     <Description>Serilog event sink that writes to the Raygun service.</Description>
     <VersionPrefix>5.0.2</VersionPrefix>
+    <RootNamespace>Serilog</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net46'">

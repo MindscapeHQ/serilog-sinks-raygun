@@ -26,7 +26,6 @@ using Mindscape.Raygun4Net.Messages;
 #endif
 using Serilog.Core;
 using Serilog.Events;
-using Serilog.Sinks.Raygun.Sinks.Raygun;
 
 namespace Serilog.Sinks.Raygun
 {
