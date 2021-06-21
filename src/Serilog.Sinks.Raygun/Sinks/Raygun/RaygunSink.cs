@@ -92,9 +92,9 @@ namespace Serilog.Sinks.Raygun
                 _client.AddWrapperExceptions(wrapperExceptions.ToArray());
 
             if(ignoredFormFieldNames != null)
-               _client.IgnoreFormFieldNames(ignoredFormFieldNames.ToArray());
+                _client.IgnoreFormFieldNames(ignoredFormFieldNames.ToArray());
 
-            _client.SendingMessage += OnSendingMessage;
+            _client.CustomGroupingKey += OnCustomGroupingKey;
         }
 
         /// <summary>
@@ -124,15 +124,15 @@ namespace Serilog.Sinks.Raygun
             // Submit
             if (logEvent.Level == LogEventLevel.Fatal)
             {
-                _client.Send(logEvent.Exception, tags, properties);
+                _client.Send(logEvent.Exception ?? new NullException(GetCurrentExecutionStackTrace()), tags, properties);
             }
             else
             {
-                _client.SendInBackground(logEvent.Exception, tags, properties);
+                _client.SendInBackground(logEvent.Exception ?? new NullException(GetCurrentExecutionStackTrace()), tags, properties);
             }
         }
 
-        private void OnSendingMessage(object sender, RaygunSendingMessageEventArgs e)
+        private void OnCustomGroupingKey(object sender, RaygunCustomGroupingKeyEventArgs e)
         {
             if (e?.Message?.Details != null)
             {
@@ -148,13 +148,13 @@ namespace Serilog.Sinks.Raygun
                 if (details.UserCustomData is Dictionary<string, LogEventPropertyValue> properties)
                 {
                     // If an Exception has not been provided, then use the log message/template to fill in the details and attach the current execution stack
-                    if (details.Error == null)
+                    if (e.Exception is NullException nullException)
                     {
                         details.Error = new RaygunErrorMessage
                         {
                             ClassName = properties[LogMessageTemplateProperty].ToString("l", null),
                             Message = properties[RenderedLogMessageProperty].ToString("l", null),
-                            StackTrace = RaygunErrorMessageBuilder.BuildStackTrace(new StackTrace())
+                            StackTrace = RaygunErrorMessageBuilder.BuildStackTrace(nullException.CodeExecutionStackTrace)
                         };
                     }
 
@@ -223,6 +223,24 @@ namespace Serilog.Sinks.Raygun
                       .ToDictionary(a => a.Name, b => b.Value);
                 }
             }
+        }
+
+        private static StackTrace GetCurrentExecutionStackTrace()
+        {
+          StackTrace stackTrace = new StackTrace();
+
+          for (int frameIndex = 0; frameIndex < stackTrace.FrameCount; frameIndex++)
+          {
+            MethodBase method = stackTrace.GetFrame(frameIndex).GetMethod();
+            string className = method?.ReflectedType?.FullName ?? "";
+
+            if (!className.StartsWith("Serilog."))
+            {
+              return new StackTrace(frameIndex);
+            }
+          }
+
+          return stackTrace;
         }
 
         private static RaygunIdentifierMessage BuildUserInformationFromStructureValue(StructureValue userStructure)
