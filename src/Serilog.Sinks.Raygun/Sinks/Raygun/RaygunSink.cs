@@ -19,7 +19,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using Mindscape.Raygun4Net;
-#if !NETSTANDARD2_0
+#if NETSTANDARD2_0
+using Mindscape.Raygun4Net.AspNetCore;
+#else
 using Mindscape.Raygun4Net.Builders;
 using Mindscape.Raygun4Net.Messages;
 #endif
@@ -44,7 +46,7 @@ namespace Serilog.Sinks.Raygun
         private readonly string _groupKeyProperty;
         private readonly string _tagsProperty;
         private readonly string _userInfoProperty;
-        private readonly SerilogRaygunClient _client;
+        private readonly RaygunClient _client;
 
         /// <summary>
         /// Construct a sink that saves errors to the Raygun service. Properties and the log message are being attached as UserCustomData and the level is included as a Tag.
@@ -77,7 +79,12 @@ namespace Serilog.Sinks.Raygun
             _groupKeyProperty = groupKeyProperty;
             _tagsProperty = tagsProperty;
             _userInfoProperty = userInfoProperty;
-            _client = new SerilogRaygunClient(applicationKey);
+            
+#if NETSTANDARD2_0
+            _client = new RaygunClient(applicationKey);
+#else
+            _client = string.IsNullOrWhiteSpace(applicationKey) ? new RaygunClient() : new RaygunClient(applicationKey);
+#endif
 
             // Raygun4Net adds these two wrapper exceptions by default, but as there is no way to remove them through this Serilog sink, we replace them entirely with the configured wrapper exceptions.
             _client.RemoveWrapperExceptions(typeof(TargetInvocationException), Type.GetType("System.Web.HttpUnhandledException, System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"));

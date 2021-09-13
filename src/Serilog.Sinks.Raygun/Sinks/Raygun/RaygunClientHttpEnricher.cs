@@ -10,8 +10,8 @@ namespace Serilog.Sinks.Raygun
 {
 	public class RaygunClientHttpEnricher : ILogEventEnricher
 	{
-		public const string RaygunRequestMessagePropertyName = "Raygun_RequestMessage";
-		public const string RaygunResponseMessagePropertyName = "Raygun_ResponseMessage";
+		public const string RaygunRequestMessagePropertyName = "RaygunSink_RequestMessage";
+		public const string RaygunResponseMessagePropertyName = "RaygunSink_ResponseMessage";
 		
 		readonly IHttpContextAccessor _httpContextAccessor;
 		private readonly LogEventLevel _restrictedToMinimumLevel;
