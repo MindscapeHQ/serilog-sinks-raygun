@@ -34,7 +34,7 @@ namespace Serilog.Sinks.Raygun
     /// </summary>
     public class RaygunSink : ILogEventSink
     {
-	      private const string RenderedLogMessageProperty = "RenderedLogMessage";
+        private const string RenderedLogMessageProperty = "RenderedLogMessage";
         private const string LogMessageTemplateProperty = "LogMessageTemplate";
         private const string OccurredProperty = "RaygunSink_OccurredOn";
 
@@ -78,7 +78,7 @@ namespace Serilog.Sinks.Raygun
             _groupKeyProperty = groupKeyProperty;
             _tagsProperty = tagsProperty;
             _userInfoProperty = userInfoProperty;
-            
+
 #if NETSTANDARD2_0
             _client = new RaygunClient(applicationKey);
 #else
@@ -91,7 +91,7 @@ namespace Serilog.Sinks.Raygun
             if (wrapperExceptions != null)
                 _client.AddWrapperExceptions(wrapperExceptions.ToArray());
 
-            if(ignoredFormFieldNames != null)
+            if (ignoredFormFieldNames != null)
                 _client.IgnoreFormFieldNames(ignoredFormFieldNames.ToArray());
 
             _client.CustomGroupingKey += OnCustomGroupingKey;
@@ -216,50 +216,50 @@ namespace Serilog.Sinks.Raygun
 
                         properties.Remove(_groupKeyProperty);
                     }
-                    
+
 #if NETSTANDARD2_0
                     // Add Http request/response messages if present and not already set
-                    if ( details.Request == null &&
-                         properties.TryGetValue( RaygunClientHttpEnricher.RaygunRequestMessagePropertyName, out var requestMessageProperty ) &&
-                         requestMessageProperty is StructureValue requestMessageValue )
+                    if (details.Request == null &&
+                        properties.TryGetValue(RaygunClientHttpEnricher.RaygunRequestMessagePropertyName, out var requestMessageProperty) &&
+                        requestMessageProperty is StructureValue requestMessageValue)
                     {
-	                    details.Request = BuildRequestMessageFromStructureValue( requestMessageValue );
-	                    properties.Remove( RaygunClientHttpEnricher.RaygunRequestMessagePropertyName );
+                        details.Request = BuildRequestMessageFromStructureValue(requestMessageValue);
+                        properties.Remove(RaygunClientHttpEnricher.RaygunRequestMessagePropertyName);
                     }
 
-                    if ( details.Response == null &&
-                         properties.TryGetValue( RaygunClientHttpEnricher.RaygunResponseMessagePropertyName, out var responseMessageProperty ) &&
-                         responseMessageProperty is StructureValue responseMessageValue )
+                    if (details.Response == null &&
+                        properties.TryGetValue(RaygunClientHttpEnricher.RaygunResponseMessagePropertyName, out var responseMessageProperty) &&
+                        responseMessageProperty is StructureValue responseMessageValue)
                     {
-	                    details.Response = BuildResponseMessageFromStructureValue( responseMessageValue );
-	                    properties.Remove(RaygunClientHttpEnricher.RaygunResponseMessagePropertyName);
+                        details.Response = BuildResponseMessageFromStructureValue(responseMessageValue);
+                        properties.Remove(RaygunClientHttpEnricher.RaygunResponseMessagePropertyName);
                     }
 #endif
 
                     // Simplify the remaining properties to be used as user-custom-data
                     details.UserCustomData = properties
-                      .Select(pv => new { Name = pv.Key, Value = RaygunPropertyFormatter.Simplify(pv.Value) })
-                      .ToDictionary(a => a.Name, b => b.Value);
+                        .Select(pv => new { Name = pv.Key, Value = RaygunPropertyFormatter.Simplify(pv.Value) })
+                        .ToDictionary(a => a.Name, b => b.Value);
                 }
             }
         }
 
         private static StackTrace GetCurrentExecutionStackTrace()
         {
-          StackTrace stackTrace = new StackTrace();
+            StackTrace stackTrace = new StackTrace();
 
-          for (int frameIndex = 0; frameIndex < stackTrace.FrameCount; frameIndex++)
-          {
-            MethodBase method = stackTrace.GetFrame(frameIndex).GetMethod();
-            string className = method?.ReflectedType?.FullName ?? "";
-
-            if (!className.StartsWith("Serilog."))
+            for (int frameIndex = 0; frameIndex < stackTrace.FrameCount; frameIndex++)
             {
-              return new StackTrace(frameIndex);
-            }
-          }
+                MethodBase method = stackTrace.GetFrame(frameIndex).GetMethod();
+                string className = method?.ReflectedType?.FullName ?? "";
 
-          return stackTrace;
+                if (!className.StartsWith("Serilog."))
+                {
+                    return new StackTrace(frameIndex);
+                }
+            }
+
+            return stackTrace;
         }
 
         private static RaygunIdentifierMessage BuildUserInformationFromStructureValue(StructureValue userStructure)
@@ -271,22 +271,22 @@ namespace Serilog.Sinks.Raygun
                 switch (property.Name)
                 {
                     case nameof(RaygunIdentifierMessage.Identifier):
-                        userIdentifier.Identifier = property.AsString( );
+                        userIdentifier.Identifier = property.AsString();
                         break;
                     case nameof(RaygunIdentifierMessage.IsAnonymous):
                         userIdentifier.IsAnonymous = "True".Equals(property.Value.ToString());
                         break;
                     case nameof(RaygunIdentifierMessage.Email):
-                        userIdentifier.Email = property.AsString( );
+                        userIdentifier.Email = property.AsString();
                         break;
                     case nameof(RaygunIdentifierMessage.FullName):
-                        userIdentifier.FullName = property.AsString( );
+                        userIdentifier.FullName = property.AsString();
                         break;
                     case nameof(RaygunIdentifierMessage.FirstName):
-                        userIdentifier.FirstName = property.AsString( );
+                        userIdentifier.FirstName = property.AsString();
                         break;
                     case nameof(RaygunIdentifierMessage.UUID):
-                        userIdentifier.UUID = property.AsString( );
+                        userIdentifier.UUID = property.AsString();
                         break;
                 }
             }
@@ -342,60 +342,60 @@ namespace Serilog.Sinks.Raygun
 
             return userIdentifier;
         }
-        
+
         private static RaygunResponseMessage BuildResponseMessageFromStructureValue(StructureValue responseMessageStructure)
         {
-	        var responseMessage = new RaygunResponseMessage();
+            var responseMessage = new RaygunResponseMessage();
 
-	        foreach (var property in responseMessageStructure.Properties)
-	        {
-		        switch (property.Name)
-		        {
-			        case nameof(RaygunResponseMessage.Content):
-				        responseMessage.Content = property.AsString( );
-				        break;
-			        case nameof(RaygunResponseMessage.StatusCode):
-				        responseMessage.StatusCode = property.AsInteger( );
-				        break;
-			        case nameof(RaygunResponseMessage.StatusDescription):
-				        responseMessage.StatusDescription = property.AsString( );
-				        break;
-		        }
-	        }
+            foreach (var property in responseMessageStructure.Properties)
+            {
+                switch (property.Name)
+                {
+                    case nameof(RaygunResponseMessage.Content):
+                        responseMessage.Content = property.AsString();
+                        break;
+                    case nameof(RaygunResponseMessage.StatusCode):
+                        responseMessage.StatusCode = property.AsInteger();
+                        break;
+                    case nameof(RaygunResponseMessage.StatusDescription):
+                        responseMessage.StatusDescription = property.AsString();
+                        break;
+                }
+            }
 
-	        return responseMessage;
+            return responseMessage;
         }
-        
+
         private static RaygunRequestMessage BuildRequestMessageFromStructureValue(StructureValue requestMessageStructure)
         {
-	        var requestMessage = new RaygunRequestMessage();
+            var requestMessage = new RaygunRequestMessage();
 
-	        foreach (var property in requestMessageStructure.Properties)
-	        {
-		        switch (property.Name)
-		        {
-			        case nameof(RaygunRequestMessage.Url):
-				        requestMessage.Url = property.AsString( );
-				        break;
-			        case nameof(RaygunRequestMessage.HostName):
-				        requestMessage.HostName = property.AsString( );
-				        break;
-			        case nameof(RaygunRequestMessage.HttpMethod):
-				        requestMessage.HttpMethod = property.AsString( );
-				        break;
-			        case nameof(RaygunRequestMessage.IPAddress):
-				        requestMessage.IPAddress = property.AsString( );
-				        break;
-			        case nameof(RaygunRequestMessage.RawData):
-				        requestMessage.RawData = property.AsString( );
-				        break;
-			        case nameof(RaygunRequestMessage.Headers):
-				        requestMessage.Headers = property.AsDictionary( );
-				        break;
-		        }
-	        }
+            foreach (var property in requestMessageStructure.Properties)
+            {
+                switch (property.Name)
+                {
+                    case nameof(RaygunRequestMessage.Url):
+                        requestMessage.Url = property.AsString();
+                        break;
+                    case nameof(RaygunRequestMessage.HostName):
+                        requestMessage.HostName = property.AsString();
+                        break;
+                    case nameof(RaygunRequestMessage.HttpMethod):
+                        requestMessage.HttpMethod = property.AsString();
+                        break;
+                    case nameof(RaygunRequestMessage.IPAddress):
+                        requestMessage.IPAddress = property.AsString();
+                        break;
+                    case nameof(RaygunRequestMessage.RawData):
+                        requestMessage.RawData = property.AsString();
+                        break;
+                    case nameof(RaygunRequestMessage.Headers):
+                        requestMessage.Headers = property.AsDictionary();
+                        break;
+                }
+            }
 
-	        return requestMessage;
+            return requestMessage;
         }
     }
 }
