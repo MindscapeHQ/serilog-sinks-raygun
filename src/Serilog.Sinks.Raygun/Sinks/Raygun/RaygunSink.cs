@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -209,6 +210,25 @@ namespace Serilog.Sinks.Raygun
 
                         properties.Remove(_groupKeyProperty);
                     }
+                    
+#if NETSTANDARD2_0
+                    // Add Http request/response messages if present and not already set
+                    if ( details.Request == null &&
+                         properties.TryGetValue( RaygunClientHttpEnricher.RaygunRequestMessagePropertyName, out var requestMessageProperty ) &&
+                         requestMessageProperty is StructureValue requestMessageValue )
+                    {
+	                    details.Request = BuildRequestMessageFromStructureValue( requestMessageValue );
+	                    properties.Remove( RaygunClientHttpEnricher.RaygunRequestMessagePropertyName );
+                    }
+
+                    if ( details.Response == null &&
+                         properties.TryGetValue( RaygunClientHttpEnricher.RaygunResponseMessagePropertyName, out var responseMessageProperty ) &&
+                         responseMessageProperty is StructureValue responseMessageValue )
+                    {
+	                    details.Response = BuildResponseMessageFromStructureValue( responseMessageValue );
+	                    properties.Remove(RaygunClientHttpEnricher.RaygunResponseMessagePropertyName);
+                    }
+#endif
 
                     // Simplify the remaining properties to be used as user-custom-data
                     details.UserCustomData = properties
@@ -317,5 +337,79 @@ namespace Serilog.Sinks.Raygun
 
             return userIdentifier;
         }
+        
+        private static RaygunResponseMessage BuildResponseMessageFromStructureValue(StructureValue responseMessageStructure)
+        {
+	        var responseMessage = new RaygunResponseMessage();
+
+	        foreach (var property in responseMessageStructure.Properties)
+	        {
+		        ScalarValue scalar = property.Value as ScalarValue;
+		        switch (property.Name)
+		        {
+			        case nameof(RaygunResponseMessage.Content):
+				        responseMessage.Content = scalar?.Value != null ? property.Value.ToString("l", null) : null;
+				        break;
+			        case nameof(RaygunResponseMessage.StatusCode):
+				        responseMessage.StatusCode = scalar?.Value != null ? int.Parse(property.Value.ToString()) : 0;
+				        break;
+			        case nameof(RaygunResponseMessage.StatusDescription):
+				        responseMessage.StatusDescription = scalar?.Value != null ? property.Value.ToString("l", null) : null;
+				        break;
+		        }
+	        }
+
+	        return responseMessage;
+        }
+        
+        private static RaygunRequestMessage BuildRequestMessageFromStructureValue(StructureValue requestMessageStructure)
+        {
+	        var requestMessage = new RaygunRequestMessage();
+
+	        foreach (var property in requestMessageStructure.Properties)
+	        {
+		        switch (property.Name)
+		        {
+			        case nameof(RaygunRequestMessage.Url):
+				        requestMessage.Url = property.AsString( );
+				        break;
+			        case nameof(RaygunRequestMessage.HostName):
+				        requestMessage.HostName = property.AsString( );
+				        break;
+			        case nameof(RaygunRequestMessage.HttpMethod):
+				        requestMessage.HttpMethod = property.AsString( );
+				        break;
+			        case nameof(RaygunRequestMessage.IPAddress):
+				        requestMessage.IPAddress = property.AsString( );
+				        break;
+			        case nameof(RaygunRequestMessage.RawData):
+				        requestMessage.RawData = property.AsString( );
+				        break;
+			        case nameof(RaygunRequestMessage.Headers):
+				        requestMessage.Headers = property.AsDictionary( );
+				        break;
+		        }
+	        }
+
+	        return requestMessage;
+        }
+    }
+    
+    public static class Extensions 
+    {
+	    public static string AsString( this LogEventProperty property )
+	    {
+		    var scalar = property.Value as ScalarValue;
+		    return scalar?.Value != null ? property.Value.ToString("l", null) : null;
+	    }
+
+	    public static IDictionary AsDictionary( this LogEventProperty property )
+	    {
+		    if ( !( property.Value is DictionaryValue value ) ) return null;
+
+		    return value.Elements.ToDictionary(
+			    kv => kv.Key.ToString( "l", null ),
+			    kv => ( object )kv.Value );
+	    }
     }
 }

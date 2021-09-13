@@ -14,14 +14,21 @@ namespace Serilog.Sinks.Raygun
 		public const string RaygunResponseMessagePropertyName = "Raygun_ResponseMessage";
 		
 		readonly IHttpContextAccessor _httpContextAccessor;
+		private readonly LogEventLevel _restrictedToMinimumLevel;
 		
-		public RaygunClientHttpEnricher(IHttpContextAccessor httpContextAccessor)
+		public RaygunClientHttpEnricher(IHttpContextAccessor httpContextAccessor, LogEventLevel restrictedToMinimumLevel)
 		{
 			_httpContextAccessor = httpContextAccessor;
+			_restrictedToMinimumLevel = restrictedToMinimumLevel;
 		}
 
 		public void Enrich( LogEvent logEvent, ILogEventPropertyFactory propertyFactory )
 		{
+			if ( logEvent.Level < _restrictedToMinimumLevel )
+			{
+				return;
+			}
+			
 			if ( _httpContextAccessor?.HttpContext == null )
 			{
 				return;
@@ -35,8 +42,8 @@ namespace Serilog.Sinks.Raygun
 			
 			RaygunResponseMessage httpResponseMessage = RaygunAspNetCoreResponseMessageBuilder.Build( _httpContextAccessor.HttpContext );
 
-			logEvent.AddPropertyIfAbsent( propertyFactory.CreateProperty( RaygunRequestMessagePropertyName, httpRequestMessage ) );
-			logEvent.AddPropertyIfAbsent( propertyFactory.CreateProperty( RaygunResponseMessagePropertyName, httpResponseMessage ) );
+			logEvent.AddPropertyIfAbsent( propertyFactory.CreateProperty( RaygunRequestMessagePropertyName, httpRequestMessage, true ) );
+			logEvent.AddPropertyIfAbsent( propertyFactory.CreateProperty( RaygunResponseMessagePropertyName, httpResponseMessage, true ) );
 		}
 	}
 }

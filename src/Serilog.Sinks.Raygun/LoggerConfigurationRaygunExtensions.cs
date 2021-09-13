@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
 using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Sinks.Raygun;
@@ -62,5 +63,26 @@ namespace Serilog
                 new RaygunSink(formatProvider, applicationKey, wrapperExceptions, userNameProperty, applicationVersionProperty, tags, ignoredFormFieldNames, groupKeyProperty, tagsProperty, userInfoProperty),
                 restrictedToMinimumLevel);
         }
+        
+#if NETSTANDARD2_0
+	    /// <summary>
+	    /// Add the <see cref="RaygunClientHttpEnricher"/> to the enrichment configuration.
+	    /// </summary>
+	    /// <param name="enrich"></param>
+	    /// <param name="httpContextAccessor"></param>
+	    /// <param name="restrictedToMinimumLevel"></param>
+	    /// <returns></returns>
+	    /// <exception cref="ArgumentNullException"></exception>
+	    public static LoggerConfiguration WithHttpDataForRaygun(
+	        this LoggerEnrichmentConfiguration enrich,
+	        IHttpContextAccessor httpContextAccessor = null,
+	        LogEventLevel restrictedToMinimumLevel = LogEventLevel.Error)
+        {
+	        if (enrich == null)
+		        throw new ArgumentNullException(nameof(enrich));
+
+	        return enrich.With( new RaygunClientHttpEnricher( httpContextAccessor ?? new HttpContextAccessor( ), restrictedToMinimumLevel ) );
+        }
+#endif
     }
 }
