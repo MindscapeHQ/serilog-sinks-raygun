@@ -262,26 +262,25 @@ namespace Serilog.Sinks.Raygun
 
             foreach (var property in userStructure.Properties)
             {
-                ScalarValue scalar = property.Value as ScalarValue;
                 switch (property.Name)
                 {
                     case nameof(RaygunIdentifierMessage.Identifier):
-                        userIdentifier.Identifier = scalar?.Value != null ? property.Value.ToString("l", null) : null;
+                        userIdentifier.Identifier = property.AsString( );
                         break;
                     case nameof(RaygunIdentifierMessage.IsAnonymous):
                         userIdentifier.IsAnonymous = "True".Equals(property.Value.ToString());
                         break;
                     case nameof(RaygunIdentifierMessage.Email):
-                        userIdentifier.Email = scalar?.Value != null ? property.Value.ToString("l", null) : null;
+                        userIdentifier.Email = property.AsString( );
                         break;
                     case nameof(RaygunIdentifierMessage.FullName):
-                        userIdentifier.FullName = scalar?.Value != null ? property.Value.ToString("l", null) : null;
+                        userIdentifier.FullName = property.AsString( );
                         break;
                     case nameof(RaygunIdentifierMessage.FirstName):
-                        userIdentifier.FirstName = scalar?.Value != null ? property.Value.ToString("l", null) : null;
+                        userIdentifier.FirstName = property.AsString( );
                         break;
                     case nameof(RaygunIdentifierMessage.UUID):
-                        userIdentifier.UUID = scalar?.Value != null ? property.Value.ToString("l", null) : null;
+                        userIdentifier.UUID = property.AsString( );
                         break;
                 }
             }
@@ -344,17 +343,16 @@ namespace Serilog.Sinks.Raygun
 
 	        foreach (var property in responseMessageStructure.Properties)
 	        {
-		        ScalarValue scalar = property.Value as ScalarValue;
 		        switch (property.Name)
 		        {
 			        case nameof(RaygunResponseMessage.Content):
-				        responseMessage.Content = scalar?.Value != null ? property.Value.ToString("l", null) : null;
+				        responseMessage.Content = property.AsString( );
 				        break;
 			        case nameof(RaygunResponseMessage.StatusCode):
-				        responseMessage.StatusCode = scalar?.Value != null ? int.Parse(property.Value.ToString()) : 0;
+				        responseMessage.StatusCode = property.AsInteger( );
 				        break;
 			        case nameof(RaygunResponseMessage.StatusDescription):
-				        responseMessage.StatusDescription = scalar?.Value != null ? property.Value.ToString("l", null) : null;
+				        responseMessage.StatusDescription = property.AsString( );
 				        break;
 		        }
 	        }
@@ -401,6 +399,12 @@ namespace Serilog.Sinks.Raygun
 	    {
 		    var scalar = property.Value as ScalarValue;
 		    return scalar?.Value != null ? property.Value.ToString("l", null) : null;
+	    }
+	    
+	    public static int AsInteger( this LogEventProperty property, int defaultIfNull = 0 )
+	    {
+		    var scalar = property.Value as ScalarValue;
+		    return scalar?.Value != null ? int.TryParse(property.Value.ToString(), out int result) ? result : defaultIfNull : defaultIfNull;
 	    }
 
 	    public static IDictionary AsDictionary( this LogEventProperty property )
