@@ -42,6 +42,9 @@ namespace Serilog.Sinks.Raygun
 			
 			RaygunResponseMessage httpResponseMessage = RaygunAspNetCoreResponseMessageBuilder.Build( _httpContextAccessor.HttpContext );
 
+			// The Raygun request/response messages are stored in the logEvent properties collection.
+			// When the error is sent to Raygun, these messages are extracted from the known properties
+			// and then removed so as to not duplicate data in the payload.
 			logEvent.AddPropertyIfAbsent( propertyFactory.CreateProperty( RaygunRequestMessagePropertyName, httpRequestMessage, true ) );
 			logEvent.AddPropertyIfAbsent( propertyFactory.CreateProperty( RaygunResponseMessagePropertyName, httpResponseMessage, true ) );
 		}

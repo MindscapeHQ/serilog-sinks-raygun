@@ -69,8 +69,8 @@ namespace Serilog
 	    /// Add the <see cref="RaygunClientHttpEnricher"/> to the enrichment configuration.
 	    /// </summary>
 	    /// <param name="enrich"></param>
-	    /// <param name="httpContextAccessor"></param>
-	    /// <param name="restrictedToMinimumLevel"></param>
+	    /// <param name="httpContextAccessor">Optional HttpContext accessor that provides access to the current requests HttpContext.</param>
+	    /// <param name="restrictedToMinimumLevel">Optional <see cref="LogEventLevel"/> to enrich log events. Defaults to LogEventLevel.Error.</param>
 	    /// <returns></returns>
 	    /// <exception cref="ArgumentNullException"></exception>
 	    public static LoggerConfiguration WithHttpDataForRaygun(
