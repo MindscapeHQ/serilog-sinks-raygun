@@ -14,10 +14,12 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
 using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Sinks.Raygun;
+#if NETSTANDARD2_0
+using Microsoft.AspNetCore.Http;
+#endif
 
 namespace Serilog
 {
