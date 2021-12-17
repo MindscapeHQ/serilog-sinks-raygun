@@ -6,6 +6,15 @@ A Serilog sink that writes events to Raygun
 
 ## Usage
 
+Add the Serilog and Raygun-Serilog nuget packages
+
+```powershell
+ dotnet add package Serilog
+ dotnet add package Serilog.Sinks.Raygun 
+```
+
+
+
 ```csharp
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Verbose()
