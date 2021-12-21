@@ -19,6 +19,7 @@ using Serilog.Events;
 using Serilog.Sinks.Raygun;
 #if NETSTANDARD2_0
 using Microsoft.AspNetCore.Http;
+using Mindscape.Raygun4Net.AspNetCore;
 #endif
 
 namespace Serilog
@@ -73,17 +74,19 @@ namespace Serilog
         /// <param name="enrich"></param>
         /// <param name="httpContextAccessor">Optional HttpContext accessor that provides access to the current requests HttpContext.</param>
         /// <param name="restrictedToMinimumLevel">Optional <see cref="LogEventLevel"/> to enrich log events. Defaults to LogEventLevel.Error.</param>
+        /// <param name="raygunSettings">Optional <see cref="RaygunSettings"/> used apply http data filtering.</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         public static LoggerConfiguration WithHttpDataForRaygun(
             this LoggerEnrichmentConfiguration enrich,
             IHttpContextAccessor httpContextAccessor = null,
-            LogEventLevel restrictedToMinimumLevel = LogEventLevel.Error)
+            LogEventLevel restrictedToMinimumLevel = LogEventLevel.Error,
+            RaygunSettings raygunSettings = null)
         {
             if (enrich == null)
                 throw new ArgumentNullException(nameof(enrich));
 
-            return enrich.With(new RaygunClientHttpEnricher(httpContextAccessor ?? new HttpContextAccessor(), restrictedToMinimumLevel));
+            return enrich.With(new RaygunClientHttpEnricher(httpContextAccessor ?? new HttpContextAccessor(), restrictedToMinimumLevel, raygunSettings ?? new RaygunSettings()));
         }
 #endif
     }

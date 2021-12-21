@@ -1,4 +1,5 @@
 ﻿#if NETSTANDARD2_0
+using System;
 using Microsoft.AspNetCore.Http;
 using Mindscape.Raygun4Net;
 using Mindscape.Raygun4Net.AspNetCore;
@@ -15,11 +16,13 @@ namespace Serilog.Sinks.Raygun
 
         readonly IHttpContextAccessor _httpContextAccessor;
         private readonly LogEventLevel _restrictedToMinimumLevel;
+        private readonly RaygunSettings _raygunSettings;
 
-        public RaygunClientHttpEnricher(IHttpContextAccessor httpContextAccessor, LogEventLevel restrictedToMinimumLevel)
+        public RaygunClientHttpEnricher(IHttpContextAccessor httpContextAccessor, LogEventLevel restrictedToMinimumLevel, RaygunSettings raygunSettings)
         {
             _httpContextAccessor = httpContextAccessor;
             _restrictedToMinimumLevel = restrictedToMinimumLevel;
+            _raygunSettings = raygunSettings;
         }
 
         public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
@@ -34,9 +37,23 @@ namespace Serilog.Sinks.Raygun
                 return;
             }
 
-            //todo: How to get the RaygunRequestMessageOptions
+            var options = new RaygunRequestMessageOptions
+            {
+	            IsRawDataIgnored = _raygunSettings.IsRawDataIgnored,
+	            UseXmlRawDataFilter = _raygunSettings.UseXmlRawDataFilter,
+	            IsRawDataIgnoredWhenFilteringFailed = _raygunSettings.IsRawDataIgnoredWhenFilteringFailed,
+	            UseKeyValuePairRawDataFilter = _raygunSettings.UseKeyValuePairRawDataFilter
+            };
+            
+            options.AddCookieNames(_raygunSettings.IgnoreCookieNames ?? Array.Empty<string>( ));
+            options.AddHeaderNames(_raygunSettings.IgnoreHeaderNames ?? Array.Empty<string>( ));
+            options.AddFormFieldNames(_raygunSettings.IgnoreFormFieldNames ?? Array.Empty<string>( ));
+            options.AddQueryParameterNames(_raygunSettings.IgnoreQueryParameterNames ?? Array.Empty<string>( ));
+            options.AddSensitiveFieldNames(_raygunSettings.IgnoreSensitiveFieldNames ?? Array.Empty<string>( ));
+            options.AddServerVariableNames(_raygunSettings.IgnoreServerVariableNames ?? Array.Empty<string>( ));
+            
             RaygunRequestMessage httpRequestMessage = RaygunAspNetCoreRequestMessageBuilder
-                .Build(_httpContextAccessor.HttpContext, new RaygunRequestMessageOptions())
+                .Build(_httpContextAccessor.HttpContext, options)
                 .GetAwaiter()
                 .GetResult();
 

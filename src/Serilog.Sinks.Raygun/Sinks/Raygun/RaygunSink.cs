@@ -392,6 +392,15 @@ namespace Serilog.Sinks.Raygun
                     case nameof(RaygunRequestMessage.Headers):
                         requestMessage.Headers = property.AsDictionary();
                         break;
+                    case nameof(RaygunRequestMessage.QueryString):
+                        requestMessage.QueryString = property.AsDictionary();
+                        break;
+                    case nameof(RaygunRequestMessage.Form):
+                        requestMessage.Form = property.AsDictionary();
+                        break;
+                    case nameof(RaygunRequestMessage.Data):
+                        requestMessage.Data = property.AsDictionary();
+                        break;
                 }
             }
 

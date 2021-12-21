@@ -24,7 +24,7 @@ namespace Serilog.Sinks.Raygun
 
             return value.Elements.ToDictionary(
                 kv => kv.Key.ToString("l", null),
-                kv => (object)kv.Value);
+                kv => kv.Value is ScalarValue scalarValue ? scalarValue.Value : kv.Value);
         }
     }
 }
