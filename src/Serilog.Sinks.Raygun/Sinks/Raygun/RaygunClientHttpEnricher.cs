@@ -45,12 +45,12 @@ namespace Serilog.Sinks.Raygun
 	            UseKeyValuePairRawDataFilter = _raygunSettings.UseKeyValuePairRawDataFilter
             };
             
-            options.AddCookieNames(_raygunSettings.IgnoreCookieNames ?? Array.Empty<string>( ));
-            options.AddHeaderNames(_raygunSettings.IgnoreHeaderNames ?? Array.Empty<string>( ));
-            options.AddFormFieldNames(_raygunSettings.IgnoreFormFieldNames ?? Array.Empty<string>( ));
-            options.AddQueryParameterNames(_raygunSettings.IgnoreQueryParameterNames ?? Array.Empty<string>( ));
-            options.AddSensitiveFieldNames(_raygunSettings.IgnoreSensitiveFieldNames ?? Array.Empty<string>( ));
-            options.AddServerVariableNames(_raygunSettings.IgnoreServerVariableNames ?? Array.Empty<string>( ));
+            options.AddCookieNames(_raygunSettings.IgnoreCookieNames ?? Array.Empty<string>());
+            options.AddHeaderNames(_raygunSettings.IgnoreHeaderNames ?? Array.Empty<string>());
+            options.AddFormFieldNames(_raygunSettings.IgnoreFormFieldNames ?? Array.Empty<string>());
+            options.AddQueryParameterNames(_raygunSettings.IgnoreQueryParameterNames ?? Array.Empty<string>());
+            options.AddSensitiveFieldNames(_raygunSettings.IgnoreSensitiveFieldNames ?? Array.Empty<string>());
+            options.AddServerVariableNames(_raygunSettings.IgnoreServerVariableNames ?? Array.Empty<string>());
             
             RaygunRequestMessage httpRequestMessage = RaygunAspNetCoreRequestMessageBuilder
                 .Build(_httpContextAccessor.HttpContext, options)

@@ -33,6 +33,34 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 ```
 
+When configuring using a JSON configuration file use the following example.
+
+```json
+{
+  "Serilog": {
+    "Using": [
+      "Serilog.Sinks.Raygun"
+    ],
+    "WriteTo": [
+      {
+        "Name": "Raygun",
+        "Args": {
+          "applicationKey": "RaygunAPIKey",
+          "userNameProperty": "CustomUserNameProperty",
+          "applicationVersionProperty": "CustomAppVersionProperty",
+          "restrictedToMinimumLevel": "Error",
+          "ignoredFormFieldNames": ["ignoreField1", "ignoreField2"],
+          "tags": ["globalTag1", "globalTag2"],
+          "groupKeyProperty": "CustomGroupKeyProperty",
+          "tagsProperty": "CustomTagsProperty",
+          "userInfoProperty": "CustomUserInfoProperty"
+        }
+      }
+    ]
+  }  
+}
+```
+
 ### applicationKey
 `type: string`
 
@@ -143,20 +171,59 @@ var userInfo = new RaygunIdentifierMessage("12345")
 
 Log.ForContext("CustomUserInfoProperty", userInfo, true).Error(new Exception("random error"), "other information");
 ```
+## Enrich with HTTP request and response data
+
+_Note: This is only valid for .NET Standard 2.0 and above projects. In full framework ASP.NET applications the HTTP request and response are available to Raygun4Net through the `HttpContext.Current` accessor.
+In .NET Core this is not available so you'll need to add the Serilog enricher using the `WithHttpDataForRaygun` method to capture the HTTP request and response data._
+
+### Configuration
+
+All parameters to `WithHttpDataForRaygun` are optional.
+
+```csharp
+Log.Logger = new LoggerConfiguration()
+  .WriteTo.Raygun("RaygunAPIKey")
+  .Enrich.WithHttpDataForRaygun(
+    new HttpContextAccessor(),
+    LogEventLevel.Error,
+    RaygunSettings)
+  .CreateLogger();
+```
+
+When configuring using a JSON configuration file use the following example.
+
+```json
+{
+  "Serilog": {
+    "Using": [
+      "Serilog.Sinks.Raygun"
+    ],
+    "Enrich": [
+      {
+        "Name": "WithHttpDataForRaygun",
+        "Args": {
+          "RaygunSettings": {
+            "IsRawDataIgnored": true,
+            "UseXmlRawDataFilter": true,
+            "IsRawDataIgnoredWhenFilteringFailed": true,
+            "UseKeyValuePairRawDataFilter": true,
+            "IgnoreCookieNames": ["CookieName"],
+            "IgnoreHeaderNames": ["HeaderName"],
+            "IgnoreFormFieldNames": ["FormFieldName"],
+            "IgnoreQueryParameterNames": ["QueryParameterName"],
+            "IgnoreSensitiveFieldNames": ["SensitiveFieldNames"],
+            "IgnoreServerVariableNames": ["ServerVariableName"]
+          }
+        }
+      }
+    ]
+  }
+}
+```
 
 ## Raygun4Net features configured via RaygunSettings
 
 This sink wraps the [Raygun4Net](https://github.com/MindscapeHQ/raygun4net) provider to build a crash report from an Exception and send it to Raygun. This makes the following Raygun4Net features available to you. To use these features, you need to add RaygunSettings to your configuration as explained below which is separate to the Serilog configuration.
-
-**.NET Core**
-
-Add a RaygunSettings block to your appsettings.config file where you can populate the settings that you want to use.
-
-```
-"RaygunSettings": {
-  "Setting": "Value"
-}
-```
 
 **.NET Framework**
 

@@ -44,6 +44,7 @@ namespace Serilog
         /// <param name="ignoredFormFieldNames">Specifies the form field names which to ignore when including request form data.</param>
         /// <param name="groupKeyProperty">The property containing the custom group key for the Raygun message.</param>
         /// <param name="tagsProperty">The property where additional tags are stored when emitting log events</param>
+        /// <param name="userInfoProperty">The property containing the RaygunIdentifierMessage structure used to populate user details</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration Raygun(
