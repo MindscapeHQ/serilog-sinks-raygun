@@ -6,14 +6,15 @@ A Serilog sink that writes events to Raygun
 
 ## Usage
 
-Add the Serilog and Raygun-Serilog nuget packages, via the command line
+Add the [Serilog](https://www.nuget.org/packages/serilog/) and [Serilog.Sinks.Raygun](https://www.nuget.org/packages/Serilog.Sinks.Raygun) nuget packages.
+Via the package manager, or via the command line:
 
 ```powershell
  dotnet add package Serilog
  dotnet add package Serilog.Sinks.Raygun 
 ```
 
-Then inside the `Program.Main()` setup the logger configuration
+Then setup the logger configuration; inside the `Program.Main()`, `Global.asax.Application_Start`, etc.
 
 ```csharp
 Log.Logger = new LoggerConfiguration()
