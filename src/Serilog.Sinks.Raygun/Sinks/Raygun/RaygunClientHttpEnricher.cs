@@ -39,10 +39,10 @@ namespace Serilog.Sinks.Raygun
 
             var options = new RaygunRequestMessageOptions
             {
-	            IsRawDataIgnored = _raygunSettings.IsRawDataIgnored,
-	            UseXmlRawDataFilter = _raygunSettings.UseXmlRawDataFilter,
-	            IsRawDataIgnoredWhenFilteringFailed = _raygunSettings.IsRawDataIgnoredWhenFilteringFailed,
-	            UseKeyValuePairRawDataFilter = _raygunSettings.UseKeyValuePairRawDataFilter
+                IsRawDataIgnored = _raygunSettings.IsRawDataIgnored,
+                UseXmlRawDataFilter = _raygunSettings.UseXmlRawDataFilter,
+                IsRawDataIgnoredWhenFilteringFailed = _raygunSettings.IsRawDataIgnoredWhenFilteringFailed,
+                UseKeyValuePairRawDataFilter = _raygunSettings.UseKeyValuePairRawDataFilter
             };
             
             options.AddCookieNames(_raygunSettings.IgnoreCookieNames ?? Array.Empty<string>());
