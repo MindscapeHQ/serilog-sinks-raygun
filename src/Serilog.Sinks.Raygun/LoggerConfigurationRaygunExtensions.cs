@@ -17,6 +17,10 @@ using System.Collections.Generic;
 using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Sinks.Raygun;
+#if NETSTANDARD2_0
+using Microsoft.AspNetCore.Http;
+using Mindscape.Raygun4Net.AspNetCore;
+#endif
 
 namespace Serilog
 {
@@ -39,7 +43,8 @@ namespace Serilog
         /// <param name="tags">Specifies the tags to include with every log message. The log level will always be included as a tag.</param>
         /// <param name="ignoredFormFieldNames">Specifies the form field names which to ignore when including request form data.</param>
         /// <param name="groupKeyProperty">The property containing the custom group key for the Raygun message.</param>
-        /// <param name="tagsProperty">The property where additional tags are stored when emitting log events</param>
+        /// <param name="tagsProperty">The property where additional tags are stored when emitting log events.</param>
+        /// <param name="userInfoProperty">The property containing the RaygunIdentifierMessage structure used to populate user details.</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration Raygun(
@@ -62,5 +67,28 @@ namespace Serilog
                 new RaygunSink(formatProvider, applicationKey, wrapperExceptions, userNameProperty, applicationVersionProperty, tags, ignoredFormFieldNames, groupKeyProperty, tagsProperty, userInfoProperty),
                 restrictedToMinimumLevel);
         }
+
+#if NETSTANDARD2_0
+        /// <summary>
+        /// Add the <see cref="RaygunClientHttpEnricher"/> to the enrichment configuration.
+        /// </summary>
+        /// <param name="enrich"></param>
+        /// <param name="httpContextAccessor">Optional HttpContext accessor that provides access to the current requests HttpContext.</param>
+        /// <param name="restrictedToMinimumLevel">Optional <see cref="LogEventLevel"/> to enrich log events. Defaults to LogEventLevel.Error.</param>
+        /// <param name="raygunSettings">Optional <see cref="RaygunSettings"/> that is used to apply http data filtering.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static LoggerConfiguration WithHttpDataForRaygun(
+            this LoggerEnrichmentConfiguration enrich,
+            IHttpContextAccessor httpContextAccessor = null,
+            LogEventLevel restrictedToMinimumLevel = LogEventLevel.Error,
+            RaygunSettings raygunSettings = null)
+        {
+            if (enrich == null)
+                throw new ArgumentNullException(nameof(enrich));
+
+            return enrich.With(new RaygunClientHttpEnricher(httpContextAccessor ?? new HttpContextAccessor(), restrictedToMinimumLevel, raygunSettings ?? new RaygunSettings()));
+        }
+#endif
     }
 }
