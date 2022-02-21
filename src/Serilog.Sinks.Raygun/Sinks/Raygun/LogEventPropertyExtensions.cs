@@ -6,16 +6,22 @@ namespace Serilog.Sinks.Raygun
 {
     public static class LogEventPropertyExtensions
     {
+        public static string AsString(this LogEventPropertyValue propertyValue)
+        {
+            if (!(propertyValue is ScalarValue scalar)) return null;
+            return scalar.Value is string s ? s : scalar.Value.ToString();
+        }
+        
         public static string AsString(this LogEventProperty property)
         {
-            var scalar = property.Value as ScalarValue;
-            return scalar?.Value != null ? property.Value.ToString("l", null) : null;
+            return property.Value.AsString();
         }
 
         public static int AsInteger(this LogEventProperty property, int defaultIfNull = 0)
         {
             var scalar = property.Value as ScalarValue;
-            return scalar?.Value != null ? int.TryParse(property.Value.ToString(), out int result) ? result : defaultIfNull : defaultIfNull;
+            if (scalar?.Value == null) return defaultIfNull;
+            return int.TryParse(property.Value.ToString(), out int result) ? result : defaultIfNull;
         }
 
         public static IDictionary AsDictionary(this LogEventProperty property)
