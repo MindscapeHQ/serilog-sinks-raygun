@@ -194,7 +194,7 @@ namespace Serilog.Sinks.Raygun
                         properties.ContainsKey(_userNameProperty) &&
                         properties[_userNameProperty] != null)
                     {
-	                      details.User = new RaygunIdentifierMessage(properties[_userNameProperty].AsString());
+                        details.User = new RaygunIdentifierMessage(properties[_userNameProperty].AsString());
 
                         properties.Remove(_userNameProperty);
                     }
