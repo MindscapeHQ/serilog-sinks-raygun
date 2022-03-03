@@ -152,8 +152,8 @@ namespace Serilog.Sinks.Raygun
                     {
                         details.Error = new RaygunErrorMessage
                         {
-                            ClassName = properties[LogMessageTemplateProperty].ToString("l", null),
-                            Message = properties[RenderedLogMessageProperty].ToString("l", null),
+                            ClassName = properties[LogMessageTemplateProperty].AsString(),
+                            Message = properties[RenderedLogMessageProperty].AsString(),
                             StackTrace = RaygunErrorMessageBuilder.BuildStackTrace(nullException.CodeExecutionStackTrace)
                         };
                     }
@@ -194,7 +194,7 @@ namespace Serilog.Sinks.Raygun
                         properties.ContainsKey(_userNameProperty) &&
                         properties[_userNameProperty] != null)
                     {
-                        details.User = new RaygunIdentifierMessage(properties[_userNameProperty].ToString("l", null));
+                        details.User = new RaygunIdentifierMessage(properties[_userNameProperty].AsString());
 
                         properties.Remove(_userNameProperty);
                     }
@@ -204,7 +204,7 @@ namespace Serilog.Sinks.Raygun
                         properties.ContainsKey(_applicationVersionProperty) &&
                         properties[_applicationVersionProperty] != null)
                     {
-                        details.Version = properties[_applicationVersionProperty].ToString("l", null);
+                        details.Version = properties[_applicationVersionProperty].AsString();
 
                         properties.Remove(_applicationVersionProperty);
                     }
@@ -212,7 +212,7 @@ namespace Serilog.Sinks.Raygun
                     // Add the custom group key if provided
                     if (properties.TryGetValue(_groupKeyProperty, out var customKey))
                     {
-                        details.GroupingKey = customKey.ToString("l", null);
+                        details.GroupingKey = customKey.AsString();
 
                         properties.Remove(_groupKeyProperty);
                     }
