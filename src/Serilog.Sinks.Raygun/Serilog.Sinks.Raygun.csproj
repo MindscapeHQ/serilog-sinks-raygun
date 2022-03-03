@@ -14,7 +14,7 @@
     <PackageTags>serilog sink raygun</PackageTags>
     <Copyright>Copyright © Serilog Contributors 2017-2020</Copyright>
     <Description>Serilog event sink that writes to the Raygun service.</Description>
-    <VersionPrefix>5.1.0</VersionPrefix>
+    <VersionPrefix>5.1.1</VersionPrefix>
     <RootNamespace>Serilog</RootNamespace>
   </PropertyGroup>
 
@@ -27,8 +27,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="mindscape.Raygun4Net.AspNetCore" Version="6.6.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="1.1.2" />
+    <PackageReference Include="mindscape.Raygun4Net.AspNetCore" Version="6.6.5" />
   </ItemGroup>
 
   <ItemGroup>	
