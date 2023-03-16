@@ -40,6 +40,7 @@ namespace Serilog.Sinks.Raygun
 
         private readonly IFormatProvider _formatProvider;
         private readonly string _userNameProperty;
+        private readonly string _machineNameProperty;
         private readonly string _applicationVersionProperty;
         private readonly IEnumerable<string> _tags;
         private readonly string _groupKeyProperty;
@@ -69,10 +70,12 @@ namespace Serilog.Sinks.Raygun
             IEnumerable<string> ignoredFormFieldNames = null,
             string groupKeyProperty = "GroupKey",
             string tagsProperty = "Tags",
-            string userInfoProperty = null)
+            string userInfoProperty = null, 
+            string machineNameProperty = null)
         {
             _formatProvider = formatProvider;
             _userNameProperty = userNameProperty;
+            _machineNameProperty = machineNameProperty;
             _applicationVersionProperty = applicationVersionProperty;
             _tags = tags ?? new string[0];
             _groupKeyProperty = groupKeyProperty;
@@ -88,6 +91,12 @@ namespace Serilog.Sinks.Raygun
             // Raygun4Net adds these two wrapper exceptions by default, but as there is no way to remove them through this Serilog sink, we replace them entirely with the configured wrapper exceptions.
             _client.RemoveWrapperExceptions(typeof(TargetInvocationException), Type.GetType("System.Web.HttpUnhandledException, System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"));
 
+            //Only add the event handler if the machine name is being overridden
+            if (!string.IsNullOrEmpty(_machineNameProperty))
+            {
+                _client.SendingMessage += _client_SendingMessage;
+            }
+
             if (wrapperExceptions != null)
                 _client.AddWrapperExceptions(wrapperExceptions.ToArray());
 
@@ -95,6 +104,14 @@ namespace Serilog.Sinks.Raygun
                 _client.IgnoreFormFieldNames(ignoredFormFieldNames.ToArray());
 
             _client.CustomGroupingKey += OnCustomGroupingKey;
+        }
+
+        private void _client_SendingMessage(object sender, RaygunSendingMessageEventArgs e)
+        {
+            if(!string.IsNullOrEmpty(_machineNameProperty) && e != null && e.Message != null && e.Message.Details != null)
+            {
+                e.Message.Details.MachineName = _machineNameProperty;
+            }
         }
 
         /// <summary>

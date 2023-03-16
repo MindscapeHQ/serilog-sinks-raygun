@@ -59,12 +59,13 @@ namespace Serilog
             IEnumerable<string> ignoredFormFieldNames = null,
             string groupKeyProperty = "GroupKey",
             string tagsProperty = "Tags",
-            string userInfoProperty = null)
+            string userInfoProperty = null,
+            string machineNameProperty = null)
         {
             if (loggerConfiguration == null) throw new ArgumentNullException("loggerConfiguration");
 
             return loggerConfiguration.Sink(
-                new RaygunSink(formatProvider, applicationKey, wrapperExceptions, userNameProperty, applicationVersionProperty, tags, ignoredFormFieldNames, groupKeyProperty, tagsProperty, userInfoProperty),
+                new RaygunSink(formatProvider, applicationKey, wrapperExceptions, userNameProperty, applicationVersionProperty, tags, ignoredFormFieldNames, groupKeyProperty, tagsProperty, userInfoProperty, machineNameProperty),
                 restrictedToMinimumLevel);
         }
 
