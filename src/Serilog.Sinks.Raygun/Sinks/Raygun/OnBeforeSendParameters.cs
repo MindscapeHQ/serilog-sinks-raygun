@@ -3,7 +3,7 @@ using Serilog.Events;
 
 namespace Serilog.Sinks.Raygun
 {
-    public struct OnBeforeSendParameters
+    public readonly struct OnBeforeSendParameters
     {
         private readonly LogEvent _logEvent;
         private readonly List<string> _tags;

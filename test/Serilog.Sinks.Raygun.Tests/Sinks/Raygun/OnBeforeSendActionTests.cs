@@ -11,6 +11,32 @@ namespace Serilog.Sinks.Raygun.Tests.Sinks.Raygun
     public class OnBeforeSendActionTests
     {
         [Test]
+        public void TestCreatingAndChangingOnBeforeSendParameters()
+        {
+            var logEvent = new LogEvent(
+                DateTimeOffset.Now,
+                LogEventLevel.Debug,
+                new Exception("Test Exception"),
+                new MessageTemplate(new TextToken[] { }),
+                new LogEventProperty[] { }
+            );
+
+            var tags = new List<string>();
+            var properties = new Dictionary<string, LogEventPropertyValue>();
+            
+            var onBeforeSendParameters = new OnBeforeSendParameters(
+                logEvent: logEvent,
+                tags: tags,
+                properties: properties
+            );
+            
+            Assert.IsNotNull(onBeforeSendParameters);
+            
+            onBeforeSendParameters.Tags.Add("testTag");
+            Assert.IsTrue(onBeforeSendParameters.Tags.Contains("testTag"));
+        }
+        
+        [Test]
         public void TestCreatingRaygunSinkWithOnBeforeSendAction()
         {
             var raygunSink = new RaygunSink(
