@@ -1,7 +1,5 @@
 # serilog-sinks-raygun
 
-[![Build status](https://ci.appveyor.com/api/projects/status/bol0v48ujapxobym/branch/master?svg=true)](https://ci.appveyor.com/project/serilog/serilog-sinks-raygun/branch/master)
-
 A Serilog sink that writes events to Raygun
 
 ## Usage
@@ -29,7 +27,8 @@ Log.Logger = new LoggerConfiguration()
       new[] { "ignoreField1", "ignoreField2" },
       "CustomGroupKeyProperty",
       "CustomTagsProperty",
-      "CustomUserInfoProperty")
+      "CustomUserInfoProperty",
+      onBeforeSendParameters => { /*OnBeforeSend: Action<OnBeforeSendParameters>*/ })
     .CreateLogger();
 ```
 
@@ -171,6 +170,44 @@ var userInfo = new RaygunIdentifierMessage("12345")
 
 Log.ForContext("CustomUserInfoProperty", userInfo, true).Error(new Exception("random error"), "other information");
 ```
+
+### onBeforeSend
+`type: Action<OnBeforeSendParameters>`
+
+`default: null`
+
+The field allows users to manipulate the data to be sent to Raygun.
+This is a function that is executed by the raygun client's `CustomGroupingKey` event, and happens at the end of the `OnCustomGroupingKey` event callback.
+By default it is `null`, so you don't need to set it in the constructor.
+If the field is `null`, nothing happens; if an `Action<OnBeforeSendParameters>` is passed, it is executed at the described time.
+The arguments to the action are of type `OnBeforeSendParameters`, which is a C# `struct` and thus will be allocated directly on the call-stack for efficiency.
+This means, the `struct` object will only be available to the `onBeforeSend` Action and will be automatically deallocated after it returns.
+The arguments are passed automatically to the action when it is called and contain references to the following objects passed by the Raygun client object:
+```csharp
+//Abstracted away version of the struct to just show the fields
+struct OnBeforeSendParameters
+{
+    System.Exception Exception;
+    Mindscape.Raygun4Net.Messages.RaygunMessage RaygunMessage;
+}
+```
+
+The provided action can read and/or modify their fields accordingly to produce the desired effect.
+For example, one can change the `MachineName` field in the `Details` of the `RaygunMessage` as follows:
+
+```csharp
+var raygunSink = new RaygunSink(
+    formatProvider: null,
+    applicationKey: "",
+    onBeforeSend: parameters =>
+    {
+        raygunMessage = parameters.RaygunMessage;
+        parameters.RaygunMessage.Details.MachineName = "MyMachine";
+    }
+);
+```
+
+
 ## Enrich with HTTP request and response data
 
 _Note: This is only valid for .NET Standard 2.0 and above projects. In full framework ASP.NET applications the HTTP request and response are available to Raygun4Net through the `HttpContext.Current` accessor.

@@ -126,13 +126,6 @@ namespace Serilog.Sinks.Raygun
                 properties.Remove(_tagsProperty);
             }
 
-            // Call onBeforeSend
-            if (_onBeforeSend != null)
-            {
-                var onBeforeSendParameters = new OnBeforeSendParameters(logEvent, tags, properties);
-                _onBeforeSend(onBeforeSendParameters);
-            }
-            
             // Decide what exception object to send
             var exception = logEvent.Exception ?? new NullException(GetCurrentExecutionStackTrace());
 
@@ -256,6 +249,13 @@ namespace Serilog.Sinks.Raygun
                         .Select(pv => new { Name = pv.Key, Value = RaygunPropertyFormatter.Simplify(pv.Value) })
                         .ToDictionary(a => a.Name, b => b.Value);
                 }
+            }
+            
+            // Call onBeforeSend
+            if (_onBeforeSend != null)
+            {
+                var onBeforeSendParameters = new OnBeforeSendParameters(e?.Exception, e?.Message);
+                _onBeforeSend(onBeforeSendParameters);
             }
         }
 

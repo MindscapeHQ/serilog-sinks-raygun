@@ -1,23 +1,26 @@
-﻿using System.Collections.Generic;
-using Serilog.Events;
+﻿using System;
+using Mindscape.Raygun4Net;
+#if NETSTANDARD2_0
+using Mindscape.Raygun4Net.AspNetCore;
+#else
+using Mindscape.Raygun4Net.Builders;
+using Mindscape.Raygun4Net.Messages;
+#endif
 
 namespace Serilog.Sinks.Raygun
 {
     public readonly struct OnBeforeSendParameters
     {
-        private readonly LogEvent _logEvent;
-        private readonly List<string> _tags;
-        private readonly Dictionary<string, LogEventPropertyValue> _properties;
+        private readonly Exception _exception;
+        private readonly RaygunMessage _raygunMessage;
 
-        public LogEvent LogEvent => _logEvent;
-        public List<string> Tags => _tags;
-        public Dictionary<string, LogEventPropertyValue> Properties => _properties;
+        public Exception Exception => _exception;
+        public RaygunMessage RaygunMessage => _raygunMessage;
 
-        public OnBeforeSendParameters(LogEvent logEvent, List<string> tags, Dictionary<string, LogEventPropertyValue> properties)
+        public OnBeforeSendParameters(Exception exception, RaygunMessage raygunMessage)
         {
-            _logEvent = logEvent;
-            _tags = tags;
-            _properties = properties;
+            _exception = exception;
+            _raygunMessage = raygunMessage;
         }
     }
 }
