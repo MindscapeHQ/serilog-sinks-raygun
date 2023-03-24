@@ -176,16 +176,12 @@ Log.ForContext("CustomUserInfoProperty", userInfo, true).Error(new Exception("ra
 
 `default: null`
 
-The field allows users to manipulate the data to be sent to Raygun.
-This is a function that is executed by the raygun client's `CustomGroupingKey` event, and happens at the end of the `OnCustomGroupingKey` event callback.
-By default it is `null`, so you don't need to set it in the constructor.
-If the field is `null`, nothing happens; if an `Action<OnBeforeSendParameters>` is passed, it is executed at the described time.
-The arguments to the action are of type `OnBeforeSendParameters`, which is a C# `struct` and thus will be allocated directly on the call-stack for efficiency.
-This means, the `struct` object will only be available to the `onBeforeSend` Action and will be automatically deallocated after it returns.
-The arguments are passed automatically to the action when it is called and contain references to the following objects passed by the Raygun client object:
+The field allows users to manipulate the crash report payload to be sent to Raygun.
+By default it is `null`, so you don't need to set it in the constructor. If the field is `null`, nothing happens; if an `Action<OnBeforeSendParameters>` is passed, it gets called just before the crash report payload gets serialized and sent to Raygun.
+The arguments to the action are of type `Struct OnBeforeSendArguments`; they are passed to the action when it is called and contain references to the following objects passed by the Raygun client object:
 ```csharp
 //Abstracted away version of the struct to just show the fields
-struct OnBeforeSendParameters
+struct OnBeforeSendArguments
 {
     System.Exception Exception;
     Mindscape.Raygun4Net.Messages.RaygunMessage RaygunMessage;
@@ -199,10 +195,10 @@ For example, one can change the `MachineName` field in the `Details` of the `Ray
 var raygunSink = new RaygunSink(
     formatProvider: null,
     applicationKey: "",
-    onBeforeSend: parameters =>
+    onBeforeSend: arguments =>
     {
-        raygunMessage = parameters.RaygunMessage;
-        parameters.RaygunMessage.Details.MachineName = "MyMachine";
+        raygunMessage = arguments.RaygunMessage;
+        arguments.RaygunMessage.Details.MachineName = "MyMachine";
     }
 );
 ```

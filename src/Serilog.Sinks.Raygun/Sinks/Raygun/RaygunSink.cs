@@ -46,7 +46,7 @@ namespace Serilog.Sinks.Raygun
         private readonly string _tagsProperty;
         private readonly string _userInfoProperty;
         private readonly RaygunClient _client;
-        private readonly Action<OnBeforeSendParameters> _onBeforeSend;
+        private readonly Action<OnBeforeSendArguments> _onBeforeSend;
 
         /// <summary>
         /// Construct a sink that saves errors to the Raygun service. Properties and the log message are being attached as UserCustomData and the level is included as a Tag.
@@ -72,7 +72,7 @@ namespace Serilog.Sinks.Raygun
             string groupKeyProperty = "GroupKey",
             string tagsProperty = "Tags",
             string userInfoProperty = null,
-            Action<OnBeforeSendParameters> onBeforeSend = null)
+            Action<OnBeforeSendArguments> onBeforeSend = null)
         {
             _formatProvider = formatProvider;
             _userNameProperty = userNameProperty;
@@ -254,8 +254,8 @@ namespace Serilog.Sinks.Raygun
             // Call onBeforeSend
             if (_onBeforeSend != null)
             {
-                var onBeforeSendParameters = new OnBeforeSendParameters(e?.Exception, e?.Message);
-                _onBeforeSend(onBeforeSendParameters);
+                var onBeforeSendArguments = new OnBeforeSendArguments(e?.Exception, e?.Message);
+                _onBeforeSend(onBeforeSendArguments);
             }
         }
 

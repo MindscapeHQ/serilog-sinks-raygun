@@ -17,7 +17,7 @@ namespace Serilog.Sinks.Raygun.Tests.Sinks.Raygun
             var exception = new Exception();
             var raygunMessage = new RaygunMessage();
             
-            var onBeforeSendParameters = new OnBeforeSendParameters(
+            var onBeforeSendParameters = new OnBeforeSendArguments(
                 exception: exception,
                 raygunMessage: raygunMessage
             );
@@ -34,7 +34,7 @@ namespace Serilog.Sinks.Raygun.Tests.Sinks.Raygun
             var raygunSink = new RaygunSink(
                 formatProvider: null,
                 applicationKey: "",
-                onBeforeSend: parameters => { }
+                onBeforeSend: arguments => { }
                 );
             
             Assert.NotNull(raygunSink);
@@ -47,7 +47,7 @@ namespace Serilog.Sinks.Raygun.Tests.Sinks.Raygun
             var raygunSink = new RaygunSink(
                 formatProvider: null,
                 applicationKey: "",
-                onBeforeSend: parameters =>
+                onBeforeSend: arguments =>
                 {
                     onBeforeSendFlag = true;
                 }
@@ -80,10 +80,10 @@ namespace Serilog.Sinks.Raygun.Tests.Sinks.Raygun
             var raygunSink = new RaygunSink(
                 formatProvider: null,
                 applicationKey: "",
-                onBeforeSend: parameters =>
+                onBeforeSend: arguments =>
                 {
-                    raygunMessage = parameters.RaygunMessage;
-                    parameters.RaygunMessage.Details.MachineName = "TestMachineName";
+                    raygunMessage = arguments.RaygunMessage;
+                    arguments.RaygunMessage.Details.MachineName = "TestMachineName";
                 }
             );
             

@@ -9,7 +9,7 @@ using Mindscape.Raygun4Net.Messages;
 
 namespace Serilog.Sinks.Raygun
 {
-    public readonly struct OnBeforeSendParameters
+    public readonly struct OnBeforeSendArguments
     {
         private readonly Exception _exception;
         private readonly RaygunMessage _raygunMessage;
@@ -17,7 +17,7 @@ namespace Serilog.Sinks.Raygun
         public Exception Exception => _exception;
         public RaygunMessage RaygunMessage => _raygunMessage;
 
-        public OnBeforeSendParameters(Exception exception, RaygunMessage raygunMessage)
+        public OnBeforeSendArguments(Exception exception, RaygunMessage raygunMessage)
         {
             _exception = exception;
             _raygunMessage = raygunMessage;
