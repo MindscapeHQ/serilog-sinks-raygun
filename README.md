@@ -28,7 +28,7 @@ Log.Logger = new LoggerConfiguration()
       "CustomGroupKeyProperty",
       "CustomTagsProperty",
       "CustomUserInfoProperty",
-      onBeforeSendParameters => { /*OnBeforeSend: Action<OnBeforeSendParameters>*/ })
+      onBeforeSendArguments => { /*OnBeforeSend: Action<onBeforeSendArguments>*/ })
     .CreateLogger();
 ```
 
@@ -192,14 +192,14 @@ The provided action can read and/or modify their fields accordingly to produce t
 For example, one can change the `MachineName` field in the `Details` of the `RaygunMessage` as follows:
 
 ```csharp
-var raygunSink = new RaygunSink(
-    formatProvider: null,
-    applicationKey: "",
-    onBeforeSend: arguments =>
-    {
-        raygunMessage = arguments.RaygunMessage;
-        arguments.RaygunMessage.Details.MachineName = "MyMachine";
-    }
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Verbose()
+    .WriteTo.Raygun(
+        applicationKey: "",
+        onBeforeSend: arguments => { 
+            arguments.RaygunMessage.Details.MachineName = "MyMachine";
+        })
+    .CreateLogger();
 );
 ```
 

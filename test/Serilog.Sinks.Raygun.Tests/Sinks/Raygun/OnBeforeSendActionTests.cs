@@ -2,6 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using Mindscape.Raygun4Net;
+#if NETSTANDARD2_0
+using Mindscape.Raygun4Net.AspNetCore;
+#else
+using Mindscape.Raygun4Net.Builders;
+using Mindscape.Raygun4Net.Messages;
+#endif
 using NUnit.Framework;
 using Serilog.Events;
 using Serilog.Parsing;
@@ -12,20 +18,20 @@ namespace Serilog.Sinks.Raygun.Tests.Sinks.Raygun
     public class OnBeforeSendActionTests
     {
         [Test]
-        public void TestCreatingAndChangingOnBeforeSendParameters()
+        public void TestCreatingAndChangingOnBeforeSendArguments()
         {
             var exception = new Exception();
             var raygunMessage = new RaygunMessage();
             
-            var onBeforeSendParameters = new OnBeforeSendArguments(
+            var onBeforeSendArguments = new OnBeforeSendArguments(
                 exception: exception,
                 raygunMessage: raygunMessage
             );
             
-            Assert.IsNotNull(onBeforeSendParameters);
+            Assert.IsNotNull(onBeforeSendArguments);
 
-            onBeforeSendParameters.RaygunMessage.Details.MachineName = "TestMachineName";
-            Assert.AreEqual("TestMachineName", onBeforeSendParameters.RaygunMessage.Details.MachineName);
+            onBeforeSendArguments.RaygunMessage.Details.MachineName = "TestMachineName";
+            Assert.AreEqual("TestMachineName", onBeforeSendArguments.RaygunMessage.Details.MachineName);
         }
         
         [Test]
@@ -38,6 +44,20 @@ namespace Serilog.Sinks.Raygun.Tests.Sinks.Raygun
                 );
             
             Assert.NotNull(raygunSink);
+        }
+        
+        [Test]
+        public void TestCreatingLoggerConfigurationWithOnBeforeSendActionViaExtensionMethod()
+        {
+            var logger = new LoggerConfiguration()
+                .MinimumLevel.Verbose()
+                .WriteTo.Raygun(
+                    applicationKey: "",
+                    onBeforeSend: arguments => { }
+                    )
+                .CreateLogger();
+        
+            Assert.NotNull(logger);
         }
 
         [Test]
