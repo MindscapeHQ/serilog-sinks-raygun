@@ -46,6 +46,7 @@ namespace Serilog.Sinks.Raygun
         private readonly string _tagsProperty;
         private readonly string _userInfoProperty;
         private readonly RaygunClient _client;
+        private readonly Action<OnBeforeSendArguments> _onBeforeSend;
 
         /// <summary>
         /// Construct a sink that saves errors to the Raygun service. Properties and the log message are being attached as UserCustomData and the level is included as a Tag.
@@ -60,6 +61,7 @@ namespace Serilog.Sinks.Raygun
         /// <param name="groupKeyProperty">The property containing the custom group key for the Raygun message.</param>
         /// <param name="tagsProperty">The property where additional tags are stored when emitting log events.</param>
         /// <param name="userInfoProperty">The property where a RaygunIdentifierMessage with more user information can optionally be provided.</param>
+        /// <param name="onBeforeSend">The action to be executed right before a logging message is sent to Raygun</param>
         public RaygunSink(IFormatProvider formatProvider,
             string applicationKey,
             IEnumerable<Type> wrapperExceptions = null,
@@ -69,7 +71,8 @@ namespace Serilog.Sinks.Raygun
             IEnumerable<string> ignoredFormFieldNames = null,
             string groupKeyProperty = "GroupKey",
             string tagsProperty = "Tags",
-            string userInfoProperty = null)
+            string userInfoProperty = null,
+            Action<OnBeforeSendArguments> onBeforeSend = null)
         {
             _formatProvider = formatProvider;
             _userNameProperty = userNameProperty;
@@ -78,6 +81,8 @@ namespace Serilog.Sinks.Raygun
             _groupKeyProperty = groupKeyProperty;
             _tagsProperty = tagsProperty;
             _userInfoProperty = userInfoProperty;
+            _onBeforeSend = onBeforeSend;
+            
 
 #if NETSTANDARD2_0
             _client = new RaygunClient(applicationKey);
@@ -121,14 +126,17 @@ namespace Serilog.Sinks.Raygun
                 properties.Remove(_tagsProperty);
             }
 
+            // Decide what exception object to send
+            var exception = logEvent.Exception ?? new NullException(GetCurrentExecutionStackTrace());
+
             // Submit
             if (logEvent.Level == LogEventLevel.Fatal)
             {
-                _client.Send(logEvent.Exception ?? new NullException(GetCurrentExecutionStackTrace()), tags, properties);
+                _client.Send(exception, tags, properties);
             }
             else
             {
-                _client.SendInBackground(logEvent.Exception ?? new NullException(GetCurrentExecutionStackTrace()), tags, properties);
+                _client.SendInBackground(exception, tags, properties);
             }
         }
 
@@ -241,6 +249,13 @@ namespace Serilog.Sinks.Raygun
                         .Select(pv => new { Name = pv.Key, Value = RaygunPropertyFormatter.Simplify(pv.Value) })
                         .ToDictionary(a => a.Name, b => b.Value);
                 }
+            }
+            
+            // Call onBeforeSend
+            if (_onBeforeSend != null)
+            {
+                var onBeforeSendArguments = new OnBeforeSendArguments(e?.Exception, e?.Message);
+                _onBeforeSend(onBeforeSendArguments);
             }
         }
 
