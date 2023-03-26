@@ -176,11 +176,11 @@ Log.ForContext("CustomUserInfoProperty", userInfo, true).Error(new Exception("ra
 
 `default: null`
 
-The field allows users to manipulate the crash report payload to be sent to Raygun.
-By default it is `null`, so you don't need to set it in the constructor. If the field is `null`, nothing happens; if an `Action<OnBeforeSendParameters>` is passed, it gets called just before the crash report payload gets serialized and sent to Raygun.
+This action allows you to manipulate the crash report payloads that get sent to Raygun.
+By default it is `null`, so you don't need to set it in the constructor. If the action is `null`, nothing happens; if an `Action<OnBeforeSendParameters>` is passed, it gets called just before the crash report payload gets serialized and sent to Raygun.
 The arguments to the action are of type `Struct OnBeforeSendArguments`; they are passed to the action when it is called and contain references to the following objects passed by the Raygun client object:
 ```csharp
-//Abstracted away version of the struct to just show the fields
+// Abstracted away version of the struct to just show the properties
 struct OnBeforeSendArguments
 {
     System.Exception Exception;
@@ -188,8 +188,8 @@ struct OnBeforeSendArguments
 }
 ```
 
-The provided action can read and/or modify their fields accordingly to produce the desired effect.
-For example, one can change the `MachineName` field in the `Details` of the `RaygunMessage` as follows:
+The provided action can read and/or modify their properties accordingly to produce the desired effect.
+For example, one can change the `MachineName` property in the `Details` of the `RaygunMessage` as follows:
 
 ```csharp
 Log.Logger = new LoggerConfiguration()
