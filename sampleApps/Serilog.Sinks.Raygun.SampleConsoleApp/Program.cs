@@ -1,7 +1,7 @@
 ﻿using Serilog;
 using Serilog.Events;
 
-Console.Out.WriteLine("Please enter your Raygun API key: ");
+Console.Out.WriteLine("Please enter your Raygun application key: ");
 var raygunApiKey = Console.In.ReadLine();
 
 Log.Logger = new LoggerConfiguration()
@@ -36,7 +36,8 @@ try
 catch (Exception e)
 {
     Console.Out.WriteLine("Sending message to Raygun");
-    Log.Fatal(e, "Logging error");
+    Log.Error(e, "Logging error");
+    Thread.Sleep(1000); 
 }
 
-throw new Exception("Unhandled Serilog.Sinks.Raygun.SampleConsoleApp exception");
+Console.Out.WriteLine("All done! Please check your Raygun App to ensure the two logged exceptions appear");
