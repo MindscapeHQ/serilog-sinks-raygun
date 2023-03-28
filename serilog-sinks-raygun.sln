@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.Raygun", "src
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.Raygun.Tests", "test\Serilog.Sinks.Raygun.Tests\Serilog.Sinks.Raygun.Tests.csproj", "{E7D3E0A9-08FE-4B4F-B7D6-56FF8053B532}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.Raygun.SampleConsoleApp", "test\Serilog.Sinks.Raygun.SampleConsoleApp\Serilog.Sinks.Raygun.SampleConsoleApp.csproj", "{F5B3D704-102B-4713-9065-8DF9D687C1C8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.Raygun.SampleConsoleApp", "sampleApps\Serilog.Sinks.Raygun.SampleConsoleApp\Serilog.Sinks.Raygun.SampleConsoleApp.csproj", "{84BCC6CF-66EB-4965-9566-F3F314EDA311}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{E7D3E0A9-08FE-4B4F-B7D6-56FF8053B532}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E7D3E0A9-08FE-4B4F-B7D6-56FF8053B532}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E7D3E0A9-08FE-4B4F-B7D6-56FF8053B532}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F5B3D704-102B-4713-9065-8DF9D687C1C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F5B3D704-102B-4713-9065-8DF9D687C1C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F5B3D704-102B-4713-9065-8DF9D687C1C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F5B3D704-102B-4713-9065-8DF9D687C1C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84BCC6CF-66EB-4965-9566-F3F314EDA311}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84BCC6CF-66EB-4965-9566-F3F314EDA311}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84BCC6CF-66EB-4965-9566-F3F314EDA311}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84BCC6CF-66EB-4965-9566-F3F314EDA311}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
