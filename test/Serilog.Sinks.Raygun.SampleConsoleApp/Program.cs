@@ -21,7 +21,7 @@ Log.Logger = new LoggerConfiguration()
         {
             Console.Out.WriteLine("OnBeforeSend called with the following arguments: " + onBeforeSendArguments);
             //Updating machine name
-            onBeforeSendArguments.RaygunMessage.Details.MachineName = "Serilog.Sinks.Raygun.EndToEndTest Machine";
+            onBeforeSendArguments.RaygunMessage.Details.MachineName = "Serilog.Sinks.Raygun.SampleConsoleApp Machine";
             
             //Testing Logging in Logger callback. Uncomment to cause a stack overflow
             //Log.Fatal("Recursive error");
@@ -34,7 +34,7 @@ Log.Logger = new LoggerConfiguration()
 
 try
 {
-    throw new Exception("Serilog.Sinks.Raygun.EndToEndTest");
+    throw new Exception("Serilog.Sinks.Raygun.SampleConsoleApp");
 }
 catch (Exception e)
 {
@@ -42,4 +42,4 @@ catch (Exception e)
     Log.Fatal(e, "Logging error");
 }
 
-throw new Exception("Unhandled Serilog.Sinks.Raygun.EndToEndTest exception");
+throw new Exception("Unhandled Serilog.Sinks.Raygun.SampleConsoleApp exception");

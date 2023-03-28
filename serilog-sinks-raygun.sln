@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.Raygun", "src
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.Raygun.Tests", "test\Serilog.Sinks.Raygun.Tests\Serilog.Sinks.Raygun.Tests.csproj", "{E7D3E0A9-08FE-4B4F-B7D6-56FF8053B532}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.Raygun.EndToEndTest", "test\Serilog.Sinks.Raygun.EndToEndTest\Serilog.Sinks.Raygun.EndToEndTest.csproj", "{F5B3D704-102B-4713-9065-8DF9D687C1C8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.Raygun.SampleConsoleApp", "test\Serilog.Sinks.Raygun.SampleConsoleApp\Serilog.Sinks.Raygun.SampleConsoleApp.csproj", "{F5B3D704-102B-4713-9065-8DF9D687C1C8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
