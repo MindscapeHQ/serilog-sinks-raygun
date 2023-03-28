@@ -37,7 +37,9 @@ catch (Exception e)
 {
     Console.Out.WriteLine("Sending message to Raygun");
     Log.Error(e, "Logging error");
-    Thread.Sleep(1000); 
 }
+
+//A Thread.Sleep is normally not necessary. Adding it here because the app is too small and there might not be enough time to send the errors to Raygun because of the asynchronous Send method used 
+Thread.Sleep(1000); 
 
 Console.Out.WriteLine("All done! Please check your Raygun App to ensure the two logged exceptions appear");
