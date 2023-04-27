@@ -182,10 +182,10 @@ Log.ForContext("CustomGroupKeyProperty", "TransactionId-12345").Error(new Except
 
 This allows you to specify a key in the properties collection that contains a list of tags to include on crash reports. Note that these will be included in addition to any global tags [described above](https://raygun.com/documentation/language-guides/serilog-sinks/crashreporting/installation/#tags). If you set a list of tags in the properties collection multiple times (e.g. at different logging scopes) then only the latest list of tags will be used.
 
-{{< highlight cs >}}
+```cs
 Log.ForContext("CustomTagsProperty", new[] {"tag1", "tag2"}).Error(new Exception("random error"), "other information");
 Log.Error(new Exception("random error"), "other information {@CustomTagsProperty}", new[] {"tag3", "tag4"});
-{{< /highlight >}}
+```
 
 **userInfoProperty**
 
@@ -243,13 +243,11 @@ Log.Logger = new LoggerConfiguration()
 
 ## Enrich with HTTP request and response data
 
-{{< secondaryCallout type="note" >}}
 This is only valid for .NET Standard 2.0 and above projects. 
 
 In full framework, ASP.NET applications, the HTTP request and response are available to Raygun4Net through the `HttpContext.Current` accessor. 
 
 For .NET Core, this won't be avaliable. Therefore, you'll need to add the Serilog enricher using the `WithHttpDataForRaygun` method to capture the HTTP request and response data.
-{{< /secondaryCallout >}} 
 
 
 ### Configuration
