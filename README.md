@@ -156,7 +156,7 @@ Crash reports sent to Raygun from this Serilog sink will include HTTP context de
 
 Setting `ignoredFormFieldNames` to a list that only contains "*" will cause no form fields to be sent to Raygun. Placing * before, after or at both ends of an entry will perform an ends-with, starts-with or contains operation respectively.
 
-Note that HTTP headers, query parameters, cookies, server variables and raw request data can also be filtered out. Configuration to do so is described in the [RaygunSettings](https://raygun.com/documentation/language-guides/serilog-sinks/crashreporting/installation/#raygun4net-features-configured-via-raygunsettings) section further below.
+Note that HTTP headers, query parameters, cookies, server variables and raw request data can also be filtered out. Configuration to do so is described in the [RaygunSettings](#raygun4net-features-configured-via-raygunsettings) section further below.
 
 The `ignoreFormFieldNames` entries will also strip out specified values from the raw request payload if it is multipart/form-data.
 
@@ -180,7 +180,7 @@ Log.ForContext("CustomGroupKeyProperty", "TransactionId-12345").Error(new Except
 
 `default: Tags`
 
-This allows you to specify a key in the properties collection that contains a list of tags to include on crash reports. Note that these will be included in addition to any global tags [described above](https://raygun.com/documentation/language-guides/serilog-sinks/crashreporting/installation/#tags). If you set a list of tags in the properties collection multiple times (e.g. at different logging scopes) then only the latest list of tags will be used.
+This allows you to specify a key in the properties collection that contains a list of tags to include on crash reports. Note that these will be included in addition to any global tags [described above](#tags). If you set a list of tags in the properties collection multiple times (e.g. at different logging scopes) then only the latest list of tags will be used.
 
 ```cs
 Log.ForContext("CustomTagsProperty", new[] {"tag1", "tag2"}).Error(new Exception("random error"), "other information");
