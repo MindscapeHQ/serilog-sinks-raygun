@@ -1,4 +1,4 @@
-#serilog-sinks-raygun
+# serilog-sinks-raygun
 
 Serilog Sinks error and performance monitoring with Raygun is available using the serilog-sinks-raygun provider.
 
@@ -73,7 +73,6 @@ When configuring using a JSON configuration file use the following example -
 }
 ```
 
-
 ### Properties
 
 **applicationKey**
@@ -103,9 +102,9 @@ For example, you may not be interested in the details of an AggregateException, 
 
 This is so you can specify the username to log the information as a part of the crash report. By default it is UserName. You can set this to be to `null` if you do not want to use this feature.
 
-{{< highlight cs >}}
+```cs
 Log.ForContext("CustomUserNameProperty", "John Doe").Error(new Exception("random error"), "other information");
-{{< /highlight >}}
+```
 
 
 **applicationVersionProperty**
@@ -118,9 +117,9 @@ By default, crash reports sent to Raygun will have an ApplicationVersion field b
 
 You can specify the property key that you place the version in by using this `applicationVersionProperty` setting. Otherwise the version will be read from the "ApplicationVersion" key.
 
-{{< highlight cs >}}
+```cs
 Log.ForContext("CustomAppVersionProperty", "1.2.11").Error(new Exception("random error"), "other information");
-{{< /highlight >}}
+```
 
 **restrictedToMinimumLevel**
 
@@ -170,9 +169,9 @@ The `ignoreFormFieldNames` entries will also strip out specified values from the
 
 Crash reports sent to Raygun will be automatically grouped together based on stack trace and exception type information. The `groupKeyProperty` setting specifies a key in the logging properties collection where you can provide a grouping key. Crash reports containing a grouping key will not be grouped automatically by Raygun. Instead, crash reports with matching custom grouping keys will be grouped together.
 
-{{< highlight cs >}}
+```cs
 Log.ForContext("CustomGroupKeyProperty", "TransactionId-12345").Error(new Exception("random error"), "other information");
-{{< /highlight >}}
+```
 
 
 **tagsProperty**
@@ -198,7 +197,7 @@ This is null by default, so you need to configure the `userInfoProperty` name if
 
 The user identifier passed into the RaygunIdentifierMessage constructor could be the users name, email address, database id or whatever works best for you to identify unique users.
 
-{{< highlight cs >}}
+```cs
 var userInfo = new RaygunIdentifierMessage("12345")
 {
     FirstName = "John",
@@ -207,7 +206,7 @@ var userInfo = new RaygunIdentifierMessage("12345")
 };
 
 Log.ForContext("CustomUserInfoProperty", userInfo, true).Error(new Exception("random error"), "other information");
-{{< /highlight >}}
+```
 
 
 **onBeforeSend**
@@ -218,18 +217,18 @@ Log.ForContext("CustomUserInfoProperty", userInfo, true).Error(new Exception("ra
 
 This action allows you to manipulate the crash report payloads that get sent to Raygun. By default it is `null`, so you don't need to set it in the constructor. If the action is `null`, nothing happens; if an `Action<OnBeforeSendParameters>` is passed, it gets called just before the crash report payload gets serialized and sent to Raygun. The arguments to the action are of type `Struct OnBeforeSendArguments`; they are passed to the action when it is called and contain references to the following objects passed by the Raygun client object:
 
-{{< highlight cs >}}
+```cs
 // Abstracted away version of the struct to just show the properties
 struct OnBeforeSendArguments
 {
     System.Exception Exception;
     Mindscape.Raygun4Net.Messages.RaygunMessage RaygunMessage;
 }
-{{< /highlight >}}
+```
 
 The provided action can read and/or modify their properties accordingly to produce the desired effect. For example, one can change the `MachineName` property in the `Details` of the `RaygunMessage` as follows:
 
-{{< highlight cs >}}
+ ```cs
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Verbose()
     .WriteTo.Raygun(
@@ -238,7 +237,7 @@ Log.Logger = new LoggerConfiguration()
             arguments.RaygunMessage.Details.MachineName = "MyMachine";
         })
     .CreateLogger();
-{{< /highlight >}}
+```
 
 ------
 
@@ -257,7 +256,7 @@ For .NET Core, this won't be avaliable. Therefore, you'll need to add the Serilo
 
 All parameters to WithHttpDataForRaygun are optional.
 
-{{< highlight cs >}}
+```cs
 Log.Logger = new LoggerConfiguration()
   .WriteTo.Raygun("paste_your_api_key_here")
   .Enrich.WithHttpDataForRaygun(
@@ -265,11 +264,11 @@ Log.Logger = new LoggerConfiguration()
     LogEventLevel.Error,
     RaygunSettings)
   .CreateLogger();
-{{< /highlight >}}
+```
 
 When configuring using a JSON configuration file use the following example.
 
-{{< highlight json >}}
+```json
 {
   "Serilog": {
     "Using": [
@@ -296,7 +295,7 @@ When configuring using a JSON configuration file use the following example.
     ]
   }
 }
-{{< /highlight >}}
+```
 
 ------
 
@@ -309,16 +308,15 @@ This sink wraps the [Raygun4Net](https://github.com/MindscapeHQ/raygun4net) prov
 
 Add the following section within the configSections element of your app.config or web.config file.
 
-{{< highlight xml >}}
+```xml
 <section name="RaygunSettings" type="Mindscape.Raygun4Net.RaygunSettings, Mindscape.Raygun4Net"/>
-{{< /highlight >}}
+```
 
 Then add a RaygunSettings element containing the desired settings somewhere within the configuration element of the app.config or web.config file.
 
-{{< highlight xml >}}
+```xml
 <RaygunSettings setting="value"/>
-{{< /highlight >}}
-
+```
 
 **ThrowOnError**
 
@@ -364,8 +362,3 @@ Setting `IsRawDataIgnoredWhenFilteringFailed` to true will cause the entire raw 
 `default: true`
 
 Only available in .NET Framework applications. This is true by default which will cause crash reports to be saved to isolated storage (if possible) in cases where they fail to be sent to Raygun. This option lets you disable this functionality by setting it to false. When enabled, a maximum of 64 crash reports can be saved. This limit can be set lower than 64 via the `MaxCrashReportsStoredOffline` option.
-
-
-{{<providerCallout >}}
-The provider is open source and available at the <a href="https://github.com/MindscapeHQ/serilog-sinks-raygun">serilog-sinks-raygun public repository</a>.
-{{</providerCallout >}}
