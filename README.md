@@ -20,7 +20,7 @@ Install the Serilog (if not included already) and Serilog.Sinks.Raygun package i
 ------
 
 ## Step 2 - Initialization
-There are two recommended options for initializing the Raygun serilog sink. Which option is best to use depends on the application. 
+There are two recommended options for initializing the Raygun Serilog Sink. Which option is best to use depends on the application. 
 
 ### Option 1 - Using logger configuration
 
