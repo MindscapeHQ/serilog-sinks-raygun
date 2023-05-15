@@ -25,6 +25,7 @@ There are two recommended options for initializing the Raygun Serilog Sink. Whic
 ### Option 1 - Using logger configuration
 
 You can initialize Raygun's Serilog Sink through a Logger Configuration. This should be done inside of the main entry point of your application - for instance, Program.Main(), Global.asax, Application_Start Etc. The exact entry point will differ between frameworks.
+
 **Minimum setup example:**
 
 ```cs
@@ -56,6 +57,7 @@ Log.Logger = new LoggerConfiguration()
 
 ### Option 2 - Using the JSON configuration file
 You can initialize Raygun's Serilog Sink inside a Serilog JSON configuration file using the following examples.
+
 **Minimum setup example:**
 
 ```json
@@ -389,4 +391,4 @@ Setting `IsRawDataIgnoredWhenFilteringFailed` to true will cause the entire raw 
 
 `default: true`
 
-Only available in .NET Framework applications. This is true by default which will cause crash reports to be saved to isolated storage (if possible)
+Only available in .NET Framework applications. This is true by default which will cause crash reports to be saved to isolated storage (if possible)  in cases where they fail to be sent to Raygun. This option lets you disable this functionality by setting it to false. When enabled, a maximum of 64 crash reports can be saved. This limit can be set lower than 64 via the `MaxCrashReportsStoredOffline` option.
