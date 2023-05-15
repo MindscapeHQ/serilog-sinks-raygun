@@ -20,11 +20,11 @@ Install the Serilog (if not included already) and Serilog.Sinks.Raygun package i
 ------
 
 ## Step 2 - Initialization
-There are two main options for initializing the Raygun serilog sink. Which option is best to use depends on the application. 
+There are two recommended options for initializing the Raygun serilog sink. Which option is best to use depends on the application. 
 
 ### Option 1 - Using logger configuration
 
-You can initialize Raygun's Serilog sink through a Logger Configuration. This should be done inside of the main entry point of your application - for instance, Program.Main(), Global.asax, Application_Start Etc. The exact entry point will differ between frameworks.
+You can initialize Raygun's Serilog Sink through a Logger Configuration. This should be done inside of the main entry point of your application - for instance, Program.Main(), Global.asax, Application_Start Etc. The exact entry point will differ between frameworks.
 **Minimum setup example:**
 
 ```cs
@@ -55,7 +55,7 @@ Log.Logger = new LoggerConfiguration()
 ------
 
 ### Option 2 - Using the JSON configuration file
-You can initialize Raygun's Serilog sink inside a Serilog JSON configuration file using the following examples.
+You can initialize Raygun's Serilog Sink inside a Serilog JSON configuration file using the following examples.
 **Minimum setup example:**
 
 ```json
