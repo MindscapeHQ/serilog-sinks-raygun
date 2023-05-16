@@ -105,7 +105,9 @@ You can initialize Raygun's Serilog Sink inside a Serilog JSON configuration fil
 }
 ```
 
-### Properties
+----
+
+## Configuration Properties
 
 **applicationKey**
 
@@ -391,4 +393,4 @@ Setting `IsRawDataIgnoredWhenFilteringFailed` to true will cause the entire raw 
 
 `default: true`
 
-Only available in .NET Framework applications. This is true by default which will cause crash reports to be saved to isolated storage (if possible)  in cases where they fail to be sent to Raygun. This option lets you disable this functionality by setting it to false. When enabled, a maximum of 64 crash reports can be saved. This limit can be set lower than 64 via the `MaxCrashReportsStoredOffline` option.
+Only available in .NET Framework applications. This is true by default which will cause crash reports to be saved to isolated storage (if possible) in cases where they fail to be sent to Raygun. This option lets you disable this functionality by setting it to false. When enabled, a maximum of 64 crash reports can be saved. This limit can be set lower than 64 via the `MaxCrashReportsStoredOffline` option.
