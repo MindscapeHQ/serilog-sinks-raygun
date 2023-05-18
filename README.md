@@ -19,11 +19,24 @@ Install the Serilog (if not included already) and Serilog.Sinks.Raygun package i
 
 ------
 
-## Step 2 - Add logger configuration
+## Step 2 - Initialization
+There are two recommended options for initializing the Raygun Serilog Sink. Which option is best to use depends on the application. 
 
-Setup the logger configuration by passing in your API key. You can do this inside of Program.Main(), Global.asax, Application_Start, or how ever your application is set up with the main, start up running method of your application.
+### Option 1 - Using logger configuration
+
+You can initialize Raygun's Serilog Sink through a Logger Configuration. This should be done inside of the main entry point of your application - for instance, Program.Main(), Global.asax, Application_Start Etc. The exact entry point will differ between frameworks.
+
+**Minimum setup example:**
 
 ```cs
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Verbose()
+    .WriteTo.Raygun("paste_your_api_key_here")
+    .CreateLogger();
+```
+
+**Example setup with optional properties:**
+```csharp
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Verbose()
     .WriteTo.Raygun("paste_your_api_key_here",
@@ -40,13 +53,32 @@ Log.Logger = new LoggerConfiguration()
       onBeforeSendArguments => { /*OnBeforeSend: Action<onBeforeSendArguments>*/ })
     .CreateLogger();
 ```
-
 ------
 
-## Step 3 - Configure the JSON configuration file
+### Option 2 - Using the JSON configuration file
+You can initialize Raygun's Serilog Sink inside a Serilog JSON configuration file using the following examples.
 
-When configuring using a JSON configuration file use the following example -
+**Minimum setup example:**
 
+```json
+{
+  "Serilog": {
+    "Using": [
+      "Serilog.Sinks.Raygun"
+    ],
+    "WriteTo": [
+      {
+        "Name": "Raygun",
+        "Args": {
+          "applicationKey": "paste_your_api_key_here"
+		}
+      }
+    ]
+  }  
+}
+```
+
+**Example setup with optional properties:**
 ```json
 {
   "Serilog": {
@@ -73,7 +105,9 @@ When configuring using a JSON configuration file use the following example -
 }
 ```
 
-### Properties
+----
+
+## Configuration Properties
 
 **applicationKey**
 
