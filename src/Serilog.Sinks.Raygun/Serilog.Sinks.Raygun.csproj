@@ -8,22 +8,22 @@
     <Product>Serilog.Sinks.Raygun</Product>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>http://serilog.net</PackageProjectUrl>
-    <PackageIconUrl>http://serilog.net/images/serilog-sink-nuget.png</PackageIconUrl>
+    <PackageIcon>serilog-sink-nuget.png</PackageIcon>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/serilog/serilog-sinks-raygun</RepositoryUrl>
     <PackageTags>serilog sink raygun</PackageTags>
-    <Copyright>Copyright © Serilog Contributors 2017-2020</Copyright>
+    <Copyright>Copyright © Serilog Contributors 2017-2023</Copyright>
     <Description>Serilog event sink that writes to the Raygun service.</Description>
-    <VersionPrefix>5.3.1</VersionPrefix>
+    <VersionPrefix>5.3.3</VersionPrefix>
     <RootNamespace>Serilog</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net46'">
-    <PackageReference Include="Mindscape.Raygun4Net" Version="5.13.0" />
+    <PackageReference Include="Mindscape.Raygun4Net" Version="6.0.3" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
-    <PackageReference Include="Mindscape.Raygun4Net" Version="5.13.0" />
+    <PackageReference Include="Mindscape.Raygun4Net" Version="6.0.3" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
@@ -33,5 +33,9 @@
   <ItemGroup>	
     <PackageReference Include="Serilog" Version="2.10.0" />
   </ItemGroup>
+
+    <ItemGroup>
+    <None Include="..\..\serilog-sink-nuget.png" Pack="true" PackagePath="\"/>
+  </ItemGroup>  
 
 </Project>
