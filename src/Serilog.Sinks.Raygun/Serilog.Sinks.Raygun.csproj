@@ -1,41 +1,43 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net46;net461</TargetFrameworks>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Authors>Michiel van Oudheusden</Authors>
-    <Company>Serilog</Company>
-    <Product>Serilog.Sinks.Raygun</Product>
-    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageProjectUrl>http://serilog.net</PackageProjectUrl>
-    <PackageIcon>serilog-sink-nuget.png</PackageIcon>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/serilog/serilog-sinks-raygun</RepositoryUrl>
-    <PackageTags>serilog sink raygun</PackageTags>
-    <Copyright>Copyright © Serilog Contributors 2017-2023</Copyright>
-    <Description>Serilog event sink that writes to the Raygun service.</Description>
-    <VersionPrefix>5.3.3</VersionPrefix>
-    <RootNamespace>Serilog</RootNamespace>
-  </PropertyGroup>
+    <PropertyGroup>
+        <!--    <TargetFramework>net462</TargetFramework>-->
+        <TargetFrameworks>net6.0;net5.0;net462;netstandard2.0</TargetFrameworks>
+        <LangVersion>latest</LangVersion>
+        <OutputType>Library</OutputType>
+        
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Authors>Raygun, Michiel van Oudheusden</Authors>
+        <Company>Serilog</Company>
+        <Product>Serilog.Sinks.Raygun</Product>
+        <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+        <PackageProjectUrl>http://serilog.net</PackageProjectUrl>
+        <PackageIcon>serilog-sink-nuget.png</PackageIcon>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://github.com/serilog/serilog-sinks-raygun</RepositoryUrl>
+        <PackageTags>serilog sink raygun</PackageTags>
+        <Copyright>Copyright © Serilog Contributors 2017-2023</Copyright>
+        <Description>Serilog event sink that writes to the Raygun service.</Description>
+        <VersionPrefix>5.3.3</VersionPrefix>
+        <RootNamespace>Serilog</RootNamespace>
+    </PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net46'">
-    <PackageReference Include="Mindscape.Raygun4Net" Version="6.0.3" />
-  </ItemGroup>
+    <ItemGroup Condition="'$(TargetFramework)' == 'net6.0' or '$(TargetFramework)' == 'net5.0' or '$(TargetFramework)' == 'netstandard2.0'">
+        <PackageReference Include="Mindscape.Raygun4Net.AspNetCore" Version="7.0.0"/>
+    </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
-    <PackageReference Include="Mindscape.Raygun4Net" Version="6.0.3" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="mindscape.Raygun4Net.AspNetCore" Version="6.6.5" />
-  </ItemGroup>
-
-  <ItemGroup>	
-    <PackageReference Include="Serilog" Version="2.10.0" />
-  </ItemGroup>
+    <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
+        <PackageReference Include="Mindscape.Raygun4Net" Version="7.0.1"/>
+        <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net462" Version="1.0.3"/>
+    </ItemGroup>
 
     <ItemGroup>
-    <None Include="..\..\serilog-sink-nuget.png" Pack="true" PackagePath="\"/>
-  </ItemGroup>  
+<!--        <PackageReference Include="Mindscape.Raygun4Net.AspNetCore" Version="7.0.0"/>-->
+        <PackageReference Include="Serilog" Version="3.0.0"/>
+    </ItemGroup>
 
+    <ItemGroup>
+        <None Include="..\..\serilog-sink-nuget.png" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+    
 </Project>
