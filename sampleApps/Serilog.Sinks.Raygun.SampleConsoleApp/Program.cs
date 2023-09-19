@@ -43,4 +43,3 @@ catch (Exception e)
 Thread.Sleep(1000); 
 
 Console.Out.WriteLine("All done! Please check your Raygun App to ensure the two logged exceptions appear");
-Console.ReadKey();

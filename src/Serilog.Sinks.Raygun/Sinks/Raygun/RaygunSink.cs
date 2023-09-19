@@ -24,9 +24,7 @@ using Mindscape.Raygun4Net;
 #if NET || NETSTANDARD
 using Microsoft.AspNetCore.Http;
 using Mindscape.Raygun4Net.AspNetCore;
-
 #else
-using Mindscape.Raygun4Net;
 using Mindscape.Raygun4Net.Builders;
 using Mindscape.Raygun4Net.Messages;
 #endif
@@ -49,7 +47,6 @@ namespace Serilog.Sinks.Raygun
         private readonly string _groupKeyProperty;
         private readonly string _tagsProperty;
         private readonly string _userInfoProperty;
-        //private readonly RaygunClient _client;
         private readonly Action<OnBeforeSendArguments> _onBeforeSend;
         private readonly string _applicationKey;
         private readonly IEnumerable<Type> _wrapperExceptions;
@@ -224,8 +221,7 @@ namespace Serilog.Sinks.Raygun
                         {
                             ClassName = properties[LogMessageTemplateProperty].AsString(),
                             Message = properties[RenderedLogMessageProperty].AsString(),
-                            StackTrace =
-                                RaygunErrorMessageBuilder.BuildStackTrace(nullException.CodeExecutionStackTrace)
+                            StackTrace = RaygunErrorMessageBuilder.BuildStackTrace(nullException.CodeExecutionStackTrace)
                         };
                     }
 
@@ -291,8 +287,7 @@ namespace Serilog.Sinks.Raygun
 #if NET || NETSTANDARD
                     // Add Http request/response messages if present and not already set
                     if (details.Request == null &&
-                        properties.TryGetValue(RaygunClientHttpEnricher.RaygunRequestMessagePropertyName,
-                            out var requestMessageProperty) &&
+                        properties.TryGetValue(RaygunClientHttpEnricher.RaygunRequestMessagePropertyName, out var requestMessageProperty) &&
                         requestMessageProperty is StructureValue requestMessageValue)
                     {
                         details.Request = BuildRequestMessageFromStructureValue(requestMessageValue);
@@ -300,8 +295,7 @@ namespace Serilog.Sinks.Raygun
                     }
 
                     if (details.Response == null &&
-                        properties.TryGetValue(RaygunClientHttpEnricher.RaygunResponseMessagePropertyName,
-                            out var responseMessageProperty) &&
+                        properties.TryGetValue(RaygunClientHttpEnricher.RaygunResponseMessagePropertyName, out var responseMessageProperty) &&
                         responseMessageProperty is StructureValue responseMessageValue)
                     {
                         details.Response = BuildResponseMessageFromStructureValue(responseMessageValue);
@@ -388,8 +382,7 @@ namespace Serilog.Sinks.Raygun
                 {
                     userIdentifier = new RaygunIdentifierMessage(identifierSplit[1]);
 
-                    string[] isAnonymousSplit =
-                        properties[1].Split(new[] { '=' }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] isAnonymousSplit = properties[1].Split(new[] { '=' }, StringSplitOptions.RemoveEmptyEntries);
                     if (isAnonymousSplit.Length == 2)
                     {
                         userIdentifier.IsAnonymous = "True".Equals(isAnonymousSplit[1]);
@@ -424,8 +417,7 @@ namespace Serilog.Sinks.Raygun
             return userIdentifier;
         }
 
-        private static RaygunResponseMessage BuildResponseMessageFromStructureValue(
-            StructureValue responseMessageStructure)
+        private static RaygunResponseMessage BuildResponseMessageFromStructureValue(StructureValue responseMessageStructure)
         {
             var responseMessage = new RaygunResponseMessage();
 
@@ -448,8 +440,7 @@ namespace Serilog.Sinks.Raygun
             return responseMessage;
         }
 
-        private static RaygunRequestMessage BuildRequestMessageFromStructureValue(
-            StructureValue requestMessageStructure)
+        private static RaygunRequestMessage BuildRequestMessageFromStructureValue(StructureValue requestMessageStructure)
         {
             var requestMessage = new RaygunRequestMessage();
 

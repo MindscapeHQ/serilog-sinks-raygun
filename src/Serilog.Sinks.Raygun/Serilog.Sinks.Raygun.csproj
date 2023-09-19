@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <!--    <TargetFramework>net462</TargetFramework>-->
         <TargetFrameworks>net6.0;net5.0;net462;netstandard2.0</TargetFrameworks>
         <LangVersion>latest</LangVersion>
         <OutputType>Library</OutputType>
@@ -15,7 +14,7 @@
         <PackageIcon>serilog-sink-nuget.png</PackageIcon>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/serilog/serilog-sinks-raygun</RepositoryUrl>
-        <PackageTags>serilog sink raygun</PackageTags>
+        <PackageTags>serilog;sink;raygun;crash;exception-handling;exception-reporting;exception-handler;unhandled-exceptions;debugging;debug;bug;bugs;exceptions;error;errors;crash-reporting;aspnet-core</PackageTags>
         <Copyright>Copyright © Serilog Contributors 2017-2023</Copyright>
         <Description>Serilog event sink that writes to the Raygun service.</Description>
         <VersionPrefix>5.3.3</VersionPrefix>
@@ -34,7 +33,6 @@
     </ItemGroup>
 
     <ItemGroup>
-<!--        <PackageReference Include="Mindscape.Raygun4Net.AspNetCore" Version="7.0.0"/>-->
         <PackageReference Include="Serilog" Version="3.0.0"/>
     </ItemGroup>
 
