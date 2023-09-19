@@ -1,5 +1,5 @@
 ﻿
-#if NET
+#if NET || NETSTANDARD
 using System;
 using Microsoft.AspNetCore.Http;
 using Mindscape.Raygun4Net;

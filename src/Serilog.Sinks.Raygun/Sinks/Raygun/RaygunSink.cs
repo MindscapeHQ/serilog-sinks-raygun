@@ -21,7 +21,7 @@ using Serilog.Core;
 using Serilog.Events;
 using Mindscape.Raygun4Net;
 
-#if NET
+#if NET || NETSTANDARD
 using Microsoft.AspNetCore.Http;
 using Mindscape.Raygun4Net.AspNetCore;
 
@@ -55,7 +55,7 @@ namespace Serilog.Sinks.Raygun
         private readonly IEnumerable<Type> _wrapperExceptions;
         private readonly IEnumerable<string> _ignoredFormFieldNames;
 
-#if NET
+#if NET || NETSTANDARD
         private readonly IHttpContextAccessor _httpAccessor;
         private readonly RaygunSettings _settings;
         private readonly IRaygunAspNetCoreClientProvider _raygunAspNetCoreClientProvider;
@@ -105,7 +105,7 @@ namespace Serilog.Sinks.Raygun
             string tagsProperty = "Tags",
             string userInfoProperty = null,
             Action<OnBeforeSendArguments> onBeforeSend = null
-#if NET
+#if NET || NETSTANDARD
             , RaygunSettings settings = null
             , IRaygunAspNetCoreClientProvider raygunAspNetCoreClientProvider = null
 #endif
@@ -123,7 +123,7 @@ namespace Serilog.Sinks.Raygun
             _wrapperExceptions = wrapperExceptions;
             _ignoredFormFieldNames = ignoredFormFieldNames;
             
-#if NET
+#if NET || NETSTANDARD
             _settings = settings ?? new RaygunSettings
             {
                 ApiKey = _applicationKey
@@ -137,20 +137,11 @@ namespace Serilog.Sinks.Raygun
         private RaygunClient GetClient()
         {
             RaygunClient client = null;
-#if NET 
+#if NET || NETSTANDARD 
             client = _raygunAspNetCoreClientProvider.GetClient(_raygunAspNetCoreClientProvider.GetRaygunSettings(_settings), _httpAccessor.HttpContext);
 #else
-            client = new RaygunClient(_applicationKey);
+            client = string.IsNullOrWhiteSpace(_applicationKey) ? new RaygunClient() : new RaygunClient(_applicationKey);
 #endif
-
-
-            //_client = raygunAspNetCoreClientProvider.GetClient(raygunAspNetCoreClientProvider.GetRaygunSettings());
-
-//#if NETSTANDARD2_0
-            //_client = new RaygunClient(applicationKey);
-// #else
-//             _client = string.IsNullOrWhiteSpace(applicationKey) ? new RaygunClient() : new RaygunClient(applicationKey);
-// #endif
 
             // Raygun4Net adds these two wrapper exceptions by default, but as there is no way to remove them through this Serilog sink, we replace them entirely with the configured wrapper exceptions.
             client.RemoveWrapperExceptions(typeof(TargetInvocationException),
@@ -297,7 +288,7 @@ namespace Serilog.Sinks.Raygun
                         properties.Remove(_groupKeyProperty);
                     }
 
-#if NET
+#if NET || NETSTANDARD
                     // Add Http request/response messages if present and not already set
                     if (details.Request == null &&
                         properties.TryGetValue(RaygunClientHttpEnricher.RaygunRequestMessagePropertyName,
