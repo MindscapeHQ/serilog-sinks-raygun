@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Mindscape.Raygun4Net;
-#if NETSTANDARD2_0
+#if NET || NETSTANDARD
 using Mindscape.Raygun4Net.AspNetCore;
 #else
 using Mindscape.Raygun4Net.Builders;

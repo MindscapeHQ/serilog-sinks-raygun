@@ -14,10 +14,12 @@
 
 using System;
 using System.Collections.Generic;
+using Mindscape.Raygun4Net;
 using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Sinks.Raygun;
-#if NETSTANDARD2_0
+
+#if NET || NETSTANDARD
 using Microsoft.AspNetCore.Http;
 using Mindscape.Raygun4Net.AspNetCore;
 #endif
@@ -61,16 +63,27 @@ namespace Serilog
             string groupKeyProperty = "GroupKey",
             string tagsProperty = "Tags",
             string userInfoProperty = null,
-            Action<OnBeforeSendArguments> onBeforeSend = null)
+            Action<OnBeforeSendArguments> onBeforeSend = null
+#if NET || NETSTANDARD
+            , RaygunSettings settings = null
+            , IRaygunAspNetCoreClientProvider raygunAspNetCoreClientProvider = null
+#endif
+            )
         {
             if (loggerConfiguration == null) throw new ArgumentNullException("loggerConfiguration");
 
+#if NET || NETSTANDARD
+            return loggerConfiguration.Sink(
+                new RaygunSink(formatProvider, applicationKey, wrapperExceptions, userNameProperty, applicationVersionProperty, tags, ignoredFormFieldNames, groupKeyProperty, tagsProperty, userInfoProperty, onBeforeSend, settings, raygunAspNetCoreClientProvider),
+                restrictedToMinimumLevel);
+#else
             return loggerConfiguration.Sink(
                 new RaygunSink(formatProvider, applicationKey, wrapperExceptions, userNameProperty, applicationVersionProperty, tags, ignoredFormFieldNames, groupKeyProperty, tagsProperty, userInfoProperty, onBeforeSend),
                 restrictedToMinimumLevel);
+#endif
         }
 
-#if NETSTANDARD2_0
+#if NET || NETSTANDARD
         /// <summary>
         /// Add the <see cref="RaygunClientHttpEnricher"/> to the enrichment configuration.
         /// </summary>

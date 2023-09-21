@@ -17,15 +17,17 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using Serilog.Core;
+using Serilog.Events;
 using Mindscape.Raygun4Net;
-#if NETSTANDARD2_0
+
+#if NET || NETSTANDARD
+using Microsoft.AspNetCore.Http;
 using Mindscape.Raygun4Net.AspNetCore;
 #else
 using Mindscape.Raygun4Net.Builders;
 using Mindscape.Raygun4Net.Messages;
 #endif
-using Serilog.Core;
-using Serilog.Events;
 
 namespace Serilog.Sinks.Raygun
 {
@@ -45,9 +47,18 @@ namespace Serilog.Sinks.Raygun
         private readonly string _groupKeyProperty;
         private readonly string _tagsProperty;
         private readonly string _userInfoProperty;
-        private readonly RaygunClient _client;
         private readonly Action<OnBeforeSendArguments> _onBeforeSend;
+        private readonly string _applicationKey;
+        private readonly IEnumerable<Type> _wrapperExceptions;
+        private readonly IEnumerable<string> _ignoredFormFieldNames;
 
+#if NET || NETSTANDARD
+        private readonly IHttpContextAccessor _httpAccessor;
+        private readonly RaygunSettings _settings;
+        private readonly IRaygunAspNetCoreClientProvider _raygunAspNetCoreClientProvider;
+#endif
+
+#if !NET
         /// <summary>
         /// Construct a sink that saves errors to the Raygun service. Properties and the log message are being attached as UserCustomData and the level is included as a Tag.
         /// </summary>
@@ -62,6 +73,24 @@ namespace Serilog.Sinks.Raygun
         /// <param name="tagsProperty">The property where additional tags are stored when emitting log events.</param>
         /// <param name="userInfoProperty">The property where a RaygunIdentifierMessage with more user information can optionally be provided.</param>
         /// <param name="onBeforeSend">The action to be executed right before a logging message is sent to Raygun</param>
+#else
+        /// <summary>
+        /// Construct a sink that saves errors to the Raygun service. Properties and the log message are being attached as UserCustomData and the level is included as a Tag.
+        /// </summary>
+        /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+        /// <param name="applicationKey">The application key as found on an application in your Raygun account.</param>
+        /// <param name="wrapperExceptions">If you have common outer exceptions that wrap a valuable inner exception which you'd prefer to group by, you can specify these by providing a list.</param>
+        /// <param name="userNameProperty">Specifies the property name to read the username from. By default it is UserName. Set to null if you do not want to use this feature.</param>
+        /// <param name="applicationVersionProperty">Specifies the property to use to retrieve the application version from. You can use an enricher to add the application version to all the log events. When you specify null, Raygun will use the assembly version.</param>
+        /// <param name="tags">Specifies the tags to include with every log message. The log level will always be included as a tag.</param>
+        /// <param name="ignoredFormFieldNames">Specifies the form field names which to ignore when including request form data.</param>
+        /// <param name="groupKeyProperty">The property containing the custom group key for the Raygun message.</param>
+        /// <param name="tagsProperty">The property where additional tags are stored when emitting log events.</param>
+        /// <param name="userInfoProperty">The property where a RaygunIdentifierMessage with more user information can optionally be provided.</param>
+        /// <param name="onBeforeSend">The action to be executed right before a logging message is sent to Raygun</param>
+        /// <param name="settings">Allows you to provide settings for the Raygun service. If null, defaults are used.</param>
+        /// <param name="raygunAspNetCoreClientProvider">Provides a way to customize the Raygun client for ASP.NET Core applications. If null, a default client is used.</param>        
+#endif
         public RaygunSink(IFormatProvider formatProvider,
             string applicationKey,
             IEnumerable<Type> wrapperExceptions = null,
@@ -72,34 +101,62 @@ namespace Serilog.Sinks.Raygun
             string groupKeyProperty = "GroupKey",
             string tagsProperty = "Tags",
             string userInfoProperty = null,
-            Action<OnBeforeSendArguments> onBeforeSend = null)
+            Action<OnBeforeSendArguments> onBeforeSend = null
+#if NET || NETSTANDARD
+            , RaygunSettings settings = null
+            , IRaygunAspNetCoreClientProvider raygunAspNetCoreClientProvider = null
+#endif
+        )
         {
             _formatProvider = formatProvider;
             _userNameProperty = userNameProperty;
             _applicationVersionProperty = applicationVersionProperty;
-            _tags = tags ?? new string[0];
+            _tags = tags ?? Array.Empty<string>();
             _groupKeyProperty = groupKeyProperty;
             _tagsProperty = tagsProperty;
             _userInfoProperty = userInfoProperty;
             _onBeforeSend = onBeforeSend;
+            _applicationKey = applicationKey;
+            _wrapperExceptions = wrapperExceptions;
+            _ignoredFormFieldNames = ignoredFormFieldNames;
             
+#if NET || NETSTANDARD
+            _settings = settings ?? new RaygunSettings
+            {
+                ApiKey = _applicationKey
+            };
+            _raygunAspNetCoreClientProvider =
+                raygunAspNetCoreClientProvider ?? new DefaultRaygunAspNetCoreClientProvider();
+            _httpAccessor = new HttpContextAccessor();
+#endif
+        }
 
-#if NETSTANDARD2_0
-            _client = new RaygunClient(applicationKey);
+        private RaygunClient GetClient()
+        {
+            RaygunClient client = null;
+#if NET || NETSTANDARD 
+            client = _raygunAspNetCoreClientProvider.GetClient(_raygunAspNetCoreClientProvider.GetRaygunSettings(_settings), _httpAccessor.HttpContext);
 #else
-            _client = string.IsNullOrWhiteSpace(applicationKey) ? new RaygunClient() : new RaygunClient(applicationKey);
+            client = string.IsNullOrWhiteSpace(_applicationKey) ? new RaygunClient() : new RaygunClient(_applicationKey);
 #endif
 
             // Raygun4Net adds these two wrapper exceptions by default, but as there is no way to remove them through this Serilog sink, we replace them entirely with the configured wrapper exceptions.
-            _client.RemoveWrapperExceptions(typeof(TargetInvocationException), Type.GetType("System.Web.HttpUnhandledException, System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"));
+            client.RemoveWrapperExceptions(typeof(TargetInvocationException),
+                Type.GetType("System.Web.HttpUnhandledException, System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"));
 
-            if (wrapperExceptions != null)
-                _client.AddWrapperExceptions(wrapperExceptions.ToArray());
+            if (_wrapperExceptions != null)
+            {
+                client.AddWrapperExceptions(_wrapperExceptions.ToArray());
+            }
 
-            if (ignoredFormFieldNames != null)
-                _client.IgnoreFormFieldNames(ignoredFormFieldNames.ToArray());
+            if (_ignoredFormFieldNames != null)
+            {
+                client.IgnoreFormFieldNames(_ignoredFormFieldNames.ToArray());
+            }
 
-            _client.CustomGroupingKey += OnCustomGroupingKey;
+            client.CustomGroupingKey += OnCustomGroupingKey;
+            
+            return client;
         }
 
         /// <summary>
@@ -129,14 +186,16 @@ namespace Serilog.Sinks.Raygun
             // Decide what exception object to send
             var exception = logEvent.Exception ?? new NullException(GetCurrentExecutionStackTrace());
 
+            var client = GetClient();
+            
             // Submit
             if (logEvent.Level == LogEventLevel.Fatal)
             {
-                _client.Send(exception, tags, properties);
+                client.Send(exception, tags, properties);
             }
             else
             {
-                _client.SendInBackground(exception, tags, properties);
+                client.SendInBackground(exception, tags, properties);
             }
         }
 
@@ -225,7 +284,7 @@ namespace Serilog.Sinks.Raygun
                         properties.Remove(_groupKeyProperty);
                     }
 
-#if NETSTANDARD2_0
+#if NET || NETSTANDARD
                     // Add Http request/response messages if present and not already set
                     if (details.Request == null &&
                         properties.TryGetValue(RaygunClientHttpEnricher.RaygunRequestMessagePropertyName, out var requestMessageProperty) &&
@@ -250,7 +309,7 @@ namespace Serilog.Sinks.Raygun
                         .ToDictionary(a => a.Name, b => b.Value);
                 }
             }
-            
+
             // Call onBeforeSend
             if (_onBeforeSend != null)
             {

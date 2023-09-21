@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34024.191
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.Raygun", "src\Serilog.Sinks.Raygun\Serilog.Sinks.Raygun.csproj", "{B4EEC1AD-6E2B-49F6-A4C0-A9D39E9C4EFA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.Raygun", "src\Serilog.Sinks.Raygun\Serilog.Sinks.Raygun.csproj", "{B4EEC1AD-6E2B-49F6-A4C0-A9D39E9C4EFA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.Raygun.Tests", "test\Serilog.Sinks.Raygun.Tests\Serilog.Sinks.Raygun.Tests.csproj", "{E7D3E0A9-08FE-4B4F-B7D6-56FF8053B532}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.Raygun.Tests", "test\Serilog.Sinks.Raygun.Tests\Serilog.Sinks.Raygun.Tests.csproj", "{E7D3E0A9-08FE-4B4F-B7D6-56FF8053B532}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.Raygun.SampleConsoleApp", "sampleApps\Serilog.Sinks.Raygun.SampleConsoleApp\Serilog.Sinks.Raygun.SampleConsoleApp.csproj", "{84BCC6CF-66EB-4965-9566-F3F314EDA311}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.Raygun.SampleConsoleApp", "sampleApps\Serilog.Sinks.Raygun.SampleConsoleApp\Serilog.Sinks.Raygun.SampleConsoleApp.csproj", "{84BCC6CF-66EB-4965-9566-F3F314EDA311}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

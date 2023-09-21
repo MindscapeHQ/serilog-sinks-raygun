@@ -1,9 +1,8 @@
 ﻿using System;
+
+#if (NET || NETSTANDARD2_0_OR_GREATER) && !NETFRAMEWORK
 using Mindscape.Raygun4Net;
-#if NETSTANDARD2_0
-using Mindscape.Raygun4Net.AspNetCore;
 #else
-using Mindscape.Raygun4Net.Builders;
 using Mindscape.Raygun4Net.Messages;
 #endif
 
