@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net6.0;net5.0;net462;netstandard2.0</TargetFrameworks>
+        <TargetFrameworks>net7.0;net6.0;net5.0;net462;netstandard2.0;net6.0-android;net6.0-ios;net6.0-maccatalyst;net7.0-android;net7.0-ios;net7.0-maccatalyst</TargetFrameworks>
         <LangVersion>latest</LangVersion>
         <OutputType>Library</OutputType>
         
@@ -17,14 +17,26 @@
         <PackageTags>serilog;sink;raygun;crash;exception-handling;exception-reporting;exception-handler;unhandled-exceptions;debugging;debug;bug;bugs;exceptions;error;errors;crash-reporting;aspnet-core</PackageTags>
         <Copyright>Copyright © Serilog Contributors 2017-2023</Copyright>
         <Description>Serilog event sink that writes to the Raygun service.</Description>
-        <VersionPrefix>5.3.3</VersionPrefix>
+        <PackageReleaseNotes>https://github.com/MindscapeHQ/serilog-sinks-raygun/blob/master/CHANGE-LOG.md</PackageReleaseNotes>
+        <VersionPrefix>7.2.0</VersionPrefix>
+        <PackageVersion>7.2.0-pre-1</PackageVersion>
         <RootNamespace>Serilog</RootNamespace>
     </PropertyGroup>
 
-    <ItemGroup Condition="'$(TargetFramework)' == 'net6.0' or 
+    <ItemGroup Condition="'$(TargetFramework)' == 'net7.0' or 
+                          '$(TargetFramework)' == 'net6.0' or 
                           '$(TargetFramework)' == 'net5.0' or 
                           '$(TargetFramework)' == 'netstandard2.0'">
         <PackageReference Include="Mindscape.Raygun4Net.AspNetCore" Version="7.1.0"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'net6.0-android' or 
+                          '$(TargetFramework)' == 'net7.0-android' or 
+                          '$(TargetFramework)' == 'net6.0-ios' or 
+                          '$(TargetFramework)' == 'net7.0-ios' or 
+                          '$(TargetFramework)' == 'net6.0-maccatalyst' or 
+                          '$(TargetFramework)' == 'net7.0-maccatalyst'">
+        <PackageReference Include="Mindscape.Raygun4Net.NetCore" Version="7.1.0"/>
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net462'">

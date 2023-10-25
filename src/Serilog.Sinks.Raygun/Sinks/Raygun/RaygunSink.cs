@@ -21,9 +21,11 @@ using Serilog.Core;
 using Serilog.Events;
 using Mindscape.Raygun4Net;
 
-#if NET || NETSTANDARD
+#if (NET || NETSTANDARD) && !(IOS || ANDROID || MACCATALYST || MACOS)
 using Microsoft.AspNetCore.Http;
 using Mindscape.Raygun4Net.AspNetCore;
+#elif (NET || NETSTANDARD) && (IOS || ANDROID || MACCATALYST || MACOS)
+
 #else
 using Mindscape.Raygun4Net.Builders;
 using Mindscape.Raygun4Net.Messages;
@@ -52,28 +54,13 @@ namespace Serilog.Sinks.Raygun
         private readonly IEnumerable<Type> _wrapperExceptions;
         private readonly IEnumerable<string> _ignoredFormFieldNames;
 
-#if NET || NETSTANDARD
+#if (NET || NETSTANDARD) && !(IOS || ANDROID || MACCATALYST || MACOS)
         private readonly IHttpContextAccessor _httpAccessor;
         private readonly RaygunSettings _settings;
         private readonly IRaygunAspNetCoreClientProvider _raygunAspNetCoreClientProvider;
 #endif
 
-#if !NET
-        /// <summary>
-        /// Construct a sink that saves errors to the Raygun service. Properties and the log message are being attached as UserCustomData and the level is included as a Tag.
-        /// </summary>
-        /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
-        /// <param name="applicationKey">The application key as found on an application in your Raygun account.</param>
-        /// <param name="wrapperExceptions">If you have common outer exceptions that wrap a valuable inner exception which you'd prefer to group by, you can specify these by providing a list.</param>
-        /// <param name="userNameProperty">Specifies the property name to read the username from. By default it is UserName. Set to null if you do not want to use this feature.</param>
-        /// <param name="applicationVersionProperty">Specifies the property to use to retrieve the application version from. You can use an enricher to add the application version to all the log events. When you specify null, Raygun will use the assembly version.</param>
-        /// <param name="tags">Specifies the tags to include with every log message. The log level will always be included as a tag.</param>
-        /// <param name="ignoredFormFieldNames">Specifies the form field names which to ignore when including request form data.</param>
-        /// <param name="groupKeyProperty">The property containing the custom group key for the Raygun message.</param>
-        /// <param name="tagsProperty">The property where additional tags are stored when emitting log events.</param>
-        /// <param name="userInfoProperty">The property where a RaygunIdentifierMessage with more user information can optionally be provided.</param>
-        /// <param name="onBeforeSend">The action to be executed right before a logging message is sent to Raygun</param>
-#else
+#if (NET || NETSTANDARD) && !(IOS || ANDROID || MACCATALYST || MACOS)
         /// <summary>
         /// Construct a sink that saves errors to the Raygun service. Properties and the log message are being attached as UserCustomData and the level is included as a Tag.
         /// </summary>
@@ -89,7 +76,22 @@ namespace Serilog.Sinks.Raygun
         /// <param name="userInfoProperty">The property where a RaygunIdentifierMessage with more user information can optionally be provided.</param>
         /// <param name="onBeforeSend">The action to be executed right before a logging message is sent to Raygun</param>
         /// <param name="settings">Allows you to provide settings for the Raygun service. If null, defaults are used.</param>
-        /// <param name="raygunAspNetCoreClientProvider">Provides a way to customize the Raygun client for ASP.NET Core applications. If null, a default client is used.</param>        
+        /// <param name="raygunAspNetCoreClientProvider">Provides a way to customize the Raygun client for ASP.NET Core applications. If null, a default client is used.</param>      
+#else
+        /// <summary>
+        /// Construct a sink that saves errors to the Raygun service. Properties and the log message are being attached as UserCustomData and the level is included as a Tag.
+        /// </summary>
+        /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+        /// <param name="applicationKey">The application key as found on an application in your Raygun account.</param>
+        /// <param name="wrapperExceptions">If you have common outer exceptions that wrap a valuable inner exception which you'd prefer to group by, you can specify these by providing a list.</param>
+        /// <param name="userNameProperty">Specifies the property name to read the username from. By default it is UserName. Set to null if you do not want to use this feature.</param>
+        /// <param name="applicationVersionProperty">Specifies the property to use to retrieve the application version from. You can use an enricher to add the application version to all the log events. When you specify null, Raygun will use the assembly version.</param>
+        /// <param name="tags">Specifies the tags to include with every log message. The log level will always be included as a tag.</param>
+        /// <param name="ignoredFormFieldNames">Specifies the form field names which to ignore when including request form data.</param>
+        /// <param name="groupKeyProperty">The property containing the custom group key for the Raygun message.</param>
+        /// <param name="tagsProperty">The property where additional tags are stored when emitting log events.</param>
+        /// <param name="userInfoProperty">The property where a RaygunIdentifierMessage with more user information can optionally be provided.</param>
+        /// <param name="onBeforeSend">The action to be executed right before a logging message is sent to Raygun</param>  
 #endif
         public RaygunSink(IFormatProvider formatProvider,
             string applicationKey,
@@ -102,7 +104,7 @@ namespace Serilog.Sinks.Raygun
             string tagsProperty = "Tags",
             string userInfoProperty = null,
             Action<OnBeforeSendArguments> onBeforeSend = null
-#if NET || NETSTANDARD
+#if (NET || NETSTANDARD) && !(IOS || ANDROID || MACCATALYST || MACOS)
             , RaygunSettings settings = null
             , IRaygunAspNetCoreClientProvider raygunAspNetCoreClientProvider = null
 #endif
@@ -120,7 +122,7 @@ namespace Serilog.Sinks.Raygun
             _wrapperExceptions = wrapperExceptions;
             _ignoredFormFieldNames = ignoredFormFieldNames;
             
-#if NET || NETSTANDARD
+#if (NET || NETSTANDARD) && !(IOS || ANDROID || MACCATALYST || MACOS)
             _settings = settings ?? new RaygunSettings
             {
                 ApiKey = _applicationKey
@@ -134,8 +136,11 @@ namespace Serilog.Sinks.Raygun
         private RaygunClient GetClient()
         {
             RaygunClient client = null;
-#if NET || NETSTANDARD 
+#if (NET || NETSTANDARD) && !(IOS || ANDROID || MACCATALYST || MACOS)
             client = _raygunAspNetCoreClientProvider.GetClient(_raygunAspNetCoreClientProvider.GetRaygunSettings(_settings), _httpAccessor.HttpContext);
+#elif (NET || NETSTANDARD) && (IOS || ANDROID || MACCATALYST || MACOS)
+            // We don't have a client for usage on mobile platforms?
+            client = new RaygunClient(_applicationKey);
 #else
             client = string.IsNullOrWhiteSpace(_applicationKey) ? new RaygunClient() : new RaygunClient(_applicationKey);
 #endif
@@ -149,10 +154,13 @@ namespace Serilog.Sinks.Raygun
                 client.AddWrapperExceptions(_wrapperExceptions.ToArray());
             }
 
+#if !(IOS || ANDROID || MACCATALYST || MACOS)
+            // TODO: Figure out how we can 'ignore' form field names on mobile platforms
             if (_ignoredFormFieldNames != null)
             {
                 client.IgnoreFormFieldNames(_ignoredFormFieldNames.ToArray());
             }
+#endif
 
             client.CustomGroupingKey += OnCustomGroupingKey;
             
@@ -284,7 +292,7 @@ namespace Serilog.Sinks.Raygun
                         properties.Remove(_groupKeyProperty);
                     }
 
-#if NET || NETSTANDARD
+#if (NET || NETSTANDARD) && !(IOS || ANDROID || MACCATALYST || MACOS)
                     // Add Http request/response messages if present and not already set
                     if (details.Request == null &&
                         properties.TryGetValue(RaygunClientHttpEnricher.RaygunRequestMessagePropertyName, out var requestMessageProperty) &&

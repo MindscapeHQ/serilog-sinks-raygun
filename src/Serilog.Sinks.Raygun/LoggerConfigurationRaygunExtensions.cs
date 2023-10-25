@@ -19,7 +19,7 @@ using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Sinks.Raygun;
 
-#if NET || NETSTANDARD
+#if (NET || NETSTANDARD) && !(IOS || ANDROID || MACCATALYST || MACOS)
 using Microsoft.AspNetCore.Http;
 using Mindscape.Raygun4Net.AspNetCore;
 #endif
@@ -64,7 +64,7 @@ namespace Serilog
             string tagsProperty = "Tags",
             string userInfoProperty = null,
             Action<OnBeforeSendArguments> onBeforeSend = null
-#if NET || NETSTANDARD
+#if (NET || NETSTANDARD) && !(IOS || ANDROID || MACCATALYST || MACOS)
             , RaygunSettings settings = null
             , IRaygunAspNetCoreClientProvider raygunAspNetCoreClientProvider = null
 #endif
@@ -72,7 +72,7 @@ namespace Serilog
         {
             if (loggerConfiguration == null) throw new ArgumentNullException("loggerConfiguration");
 
-#if NET || NETSTANDARD
+#if (NET || NETSTANDARD) && !(IOS || ANDROID || MACCATALYST || MACOS)
             return loggerConfiguration.Sink(
                 new RaygunSink(formatProvider, applicationKey, wrapperExceptions, userNameProperty, applicationVersionProperty, tags, ignoredFormFieldNames, groupKeyProperty, tagsProperty, userInfoProperty, onBeforeSend, settings, raygunAspNetCoreClientProvider),
                 restrictedToMinimumLevel);
@@ -83,7 +83,7 @@ namespace Serilog
 #endif
         }
 
-#if NET || NETSTANDARD
+#if (NET || NETSTANDARD) && !(IOS || ANDROID || MACCATALYST || MACOS)
         /// <summary>
         /// Add the <see cref="RaygunClientHttpEnricher"/> to the enrichment configuration.
         /// </summary>

@@ -9,6 +9,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.Raygun.Tests"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.Raygun.SampleConsoleApp", "sampleApps\Serilog.Sinks.Raygun.SampleConsoleApp\Serilog.Sinks.Raygun.SampleConsoleApp.csproj", "{84BCC6CF-66EB-4965-9566-F3F314EDA311}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{38AEA815-E78E-4304-9FE1-19B381C3B329}"
+	ProjectSection(SolutionItems) = preProject
+		CHANGE-LOG.md = CHANGE-LOG.md
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

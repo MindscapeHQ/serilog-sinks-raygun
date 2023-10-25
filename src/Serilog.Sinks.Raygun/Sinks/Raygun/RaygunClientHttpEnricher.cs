@@ -1,5 +1,5 @@
 ﻿
-#if NET || NETSTANDARD
+#if (NET || NETSTANDARD) && !(IOS || ANDROID || MACCATALYST || MACOS)
 using System;
 using Microsoft.AspNetCore.Http;
 using Mindscape.Raygun4Net;
