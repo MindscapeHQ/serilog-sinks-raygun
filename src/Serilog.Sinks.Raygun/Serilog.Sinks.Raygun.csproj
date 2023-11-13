@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net7.0;net6.0;net5.0;net462;netstandard2.0;net6.0-android;net6.0-ios;net6.0-maccatalyst;net7.0-android;net7.0-ios;net7.0-maccatalyst</TargetFrameworks>
+        <TargetFrameworks>net7.0;net6.0;net5.0;net462;netstandard2.0</TargetFrameworks>
         <LangVersion>latest</LangVersion>
         <OutputType>Library</OutputType>
         
@@ -18,8 +18,8 @@
         <Copyright>Copyright © Serilog Contributors 2017-2023</Copyright>
         <Description>Serilog event sink that writes to the Raygun service.</Description>
         <PackageReleaseNotes>https://github.com/MindscapeHQ/serilog-sinks-raygun/blob/master/CHANGE-LOG.md</PackageReleaseNotes>
-        <VersionPrefix>7.2.0</VersionPrefix>
-        <PackageVersion>7.2.0-pre-1</PackageVersion>
+        <VersionPrefix>7.3.0</VersionPrefix>
+        <PackageVersion>7.3.0-pre-2</PackageVersion>
         <RootNamespace>Serilog</RootNamespace>
     </PropertyGroup>
 
@@ -27,20 +27,11 @@
                           '$(TargetFramework)' == 'net6.0' or 
                           '$(TargetFramework)' == 'net5.0' or 
                           '$(TargetFramework)' == 'netstandard2.0'">
-        <PackageReference Include="Mindscape.Raygun4Net.AspNetCore" Version="7.1.0"/>
-    </ItemGroup>
-
-    <ItemGroup Condition="'$(TargetFramework)' == 'net6.0-android' or 
-                          '$(TargetFramework)' == 'net7.0-android' or 
-                          '$(TargetFramework)' == 'net6.0-ios' or 
-                          '$(TargetFramework)' == 'net7.0-ios' or 
-                          '$(TargetFramework)' == 'net6.0-maccatalyst' or 
-                          '$(TargetFramework)' == 'net7.0-maccatalyst'">
-        <PackageReference Include="Mindscape.Raygun4Net.NetCore" Version="7.1.0"/>
+        <PackageReference Include="Mindscape.Raygun4Net.NetCore" Version="8.0.0-pre-1"/>
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
-        <PackageReference Include="Mindscape.Raygun4Net" Version="7.1.0"/>
+        <PackageReference Include="Mindscape.Raygun4Net" Version="8.0.0-pre-1"/>
         <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net462" Version="1.0.3"/>
     </ItemGroup>
 
