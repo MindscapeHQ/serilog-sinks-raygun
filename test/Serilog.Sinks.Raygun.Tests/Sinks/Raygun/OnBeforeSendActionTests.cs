@@ -2,10 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Mindscape.Raygun4Net;
-#if NET || NETSTANDARD
-using Mindscape.Raygun4Net.AspNetCore;
-#else
-using Mindscape.Raygun4Net.Builders;
+#if NETFRAMEWORK
 using Mindscape.Raygun4Net.Messages;
 #endif
 using NUnit.Framework;

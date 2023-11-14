@@ -27,11 +27,11 @@
                           '$(TargetFramework)' == 'net6.0' or 
                           '$(TargetFramework)' == 'net5.0' or 
                           '$(TargetFramework)' == 'netstandard2.0'">
-        <PackageReference Include="Mindscape.Raygun4Net.NetCore" Version="8.0.0-pre-1"/>
+        <PackageReference Include="Mindscape.Raygun4Net.NetCore" Version="8.0.0"/>
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
-        <PackageReference Include="Mindscape.Raygun4Net" Version="8.0.0-pre-1"/>
+        <PackageReference Include="Mindscape.Raygun4Net" Version="8.0.0"/>
         <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net462" Version="1.0.3"/>
     </ItemGroup>
 
