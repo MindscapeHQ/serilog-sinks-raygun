@@ -39,6 +39,8 @@ catch (Exception e)
     Log.Error(e, "Logging error");
 }
 
+Log.CloseAndFlush();
+
 //A Thread.Sleep is normally not necessary. Adding it here because the app is too small and there might not be enough time to send the errors to Raygun because of the asynchronous Send method used 
 Thread.Sleep(1000); 
 
