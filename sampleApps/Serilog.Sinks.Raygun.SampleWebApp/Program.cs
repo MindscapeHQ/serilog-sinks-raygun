@@ -1,9 +1,11 @@
 using Serilog;
 
+var apiKey = Environment.GetEnvironmentVariable("RAYGUN_APIKEY") ?? "";
+
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
     .WriteTo.Console()
-    .WriteTo.Raygun("8yUAyuMjLW2ixmnQrp4q4w")
+    .WriteTo.Raygun(apiKey)
     .CreateLogger();
 
 try
