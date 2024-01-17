@@ -1,63 +1,16 @@
-using Mindscape.Raygun4Net.AspNetCore;
-using Mindscape.Raygun4Net.AspNetCore.Builders;
-using Serilog;
-using Serilog.Core;
-using Serilog.Events;
-using RaygunSettings = Mindscape.Raygun4Net.AspNetCore.RaygunSettings;
+## ASP.NET Core Enricher
 
-var apiKey = Environment.GetEnvironmentVariable("RAYGUN_APIKEY") ?? "";
+With the release of v7.3.0, the ASP.NET Core Enricher has been removed from this package. 
+This is because the enricher had a dependency on `Mindscape.Raygun4Net.AspNetCore`, which in turn had a dependency
+on `Microsoft.AspNetCore.App`. Attempting to use `Serilog.Sinks.Raygun` in a MAUI app would result in an error.
 
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Debug()
-    .Enrich.With(new RaygunClientHttpEnricher())
-    .WriteTo.Console()
-    .WriteTo.Raygun(apiKey)
-    .CreateLogger();
+If you still wish to use the enricher you can follow the steps outlined below.
 
-try
-{
-    var builder = WebApplication.CreateBuilder(args);
+### Create a new Enricher class
 
-    // Add services to the container.
-    builder.Services.AddControllersWithViews();
-    builder.Services.AddHttpContextAccessor();
+Note: You will need to include a dependency on [Mindscape.Raygun4Net.AspNetCore](https://www.nuget.org/packages/Mindscape.Raygun4Net.AspNetCore) for this to work.
 
-    builder.Host.UseSerilog();
-
-    var app = builder.Build();
-
-
-    // Configure the HTTP request pipeline.
-    if (!app.Environment.IsDevelopment())
-    {
-        app.UseExceptionHandler("/Home/Error");
-        // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-        app.UseHsts();
-    }
-
-    app.UseHttpsRedirection();
-    app.UseStaticFiles();
-
-    app.UseRouting();
-
-    app.UseAuthorization();
-
-    app.MapControllerRoute(
-        name: "default",
-        pattern: "{controller=Home}/{action=Index}/{id?}");
-
-    app.Run();
-}
-catch (Exception e)
-{
-    Log.Error(e, "Logging error");
-}
-finally
-{
-    Log.CloseAndFlush();
-}
-
-
+```c#
 public class RaygunClientHttpEnricher : ILogEventEnricher
 {
     private const string RaygunRequestMessagePropertyName = "RaygunSink_RequestMessage";
@@ -115,3 +68,26 @@ public class RaygunClientHttpEnricher : ILogEventEnricher
         logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty(RaygunResponseMessagePropertyName, httpResponseMessage, true));
     }
 }
+```
+
+### Include the enricher into Serilog configuration
+
+Please note, this an example configuration to show the use of `Enrich.With(...)`
+```c#
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .Enrich.With(new RaygunClientHttpEnricher())
+    .WriteTo.Console()
+    .WriteTo.Raygun("*your api key*")
+    .CreateLogger();
+```
+
+### Ensure HttpContextAccessor is registered with the DI container
+
+When setting up the DI container, ensure that the `HttpContextAccessor` is registered.
+
+```c#
+services.AddHttpContextAccessor();
+```
+
+When errors are thrown they should now contain the original information from the Raygun Enricher.

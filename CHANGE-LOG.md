@@ -1,5 +1,10 @@
 # Full Change Log for Serilog.Sinks.Raygun package
 
+### v7.4.0
+- Drop Serilog dependency from 3.0.0 to 2.12.0
+- Include new [Enricher Readme](README-ENRICHER.md) in repo for those who still wish to use the ASP.NET Core Enricher
+  - An example of this usage can be found in Serilog.Sinks.Raygun.SampleWebApp project
+
 ### v7.3.0
 - Drop ASP.NET Core Enricher (use `Serilog.AspNetCore` package instead)
 - Removes dependency on `Mindscape.Raygun4Net.AspNetCore` package
