@@ -279,7 +279,7 @@ Log.Logger = new LoggerConfiguration()
 
 Properties included from other Serilog Enrichers should automatically be included into the Raygun errors.
 
-To use the old Raygun Enricher you can follow the [Enricher Readme](README-ENRICHER.md) to add the enricher to your project.
+To use the old Raygun Enricher you can follow the [Enricher Readme](https://github.com/MindscapeHQ/serilog-sinks-raygun/blob/master/README-ENRICHER.md) to add the enricher to your project.
 
 ------
 
