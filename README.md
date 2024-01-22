@@ -71,7 +71,7 @@ You can initialize Raygun's Serilog Sink inside a Serilog JSON configuration fil
         "Name": "Raygun",
         "Args": {
           "applicationKey": "paste_your_api_key_here"
-		}
+        }
       }
     ]
   }  
@@ -277,57 +277,9 @@ Log.Logger = new LoggerConfiguration()
 
 ## Enrich with HTTP request and response data
 
-This is only valid for .NET Standard 2.0 and above projects. 
+Properties included from other Serilog Enrichers should automatically be included into the Raygun errors.
 
-In full framework, ASP.NET applications, the HTTP request and response are available to Raygun4Net through the `HttpContext.Current` accessor. 
-
-For .NET Core, this won't be avaliable. Therefore, you'll need to add the Serilog enricher using the `WithHttpDataForRaygun` method to capture the HTTP request and response data.
-
-
-### Configuration
-
-All parameters to WithHttpDataForRaygun are optional.
-
-```cs
-Log.Logger = new LoggerConfiguration()
-  .WriteTo.Raygun("paste_your_api_key_here")
-  .Enrich.WithHttpDataForRaygun(
-    new HttpContextAccessor(),
-    LogEventLevel.Error,
-    RaygunSettings)
-  .CreateLogger();
-```
-
-When configuring using a JSON configuration file use the following example.
-
-```json
-{
-  "Serilog": {
-    "Using": [
-      "Serilog.Sinks.Raygun"
-    ],
-    "Enrich": [
-      {
-        "Name": "WithHttpDataForRaygun",
-        "Args": {
-          "RaygunSettings": {
-            "IsRawDataIgnored": true,
-            "UseXmlRawDataFilter": true,
-            "IsRawDataIgnoredWhenFilteringFailed": true,
-            "UseKeyValuePairRawDataFilter": true,
-            "IgnoreCookieNames": ["CookieName"],
-            "IgnoreHeaderNames": ["HeaderName"],
-            "IgnoreFormFieldNames": ["FormFieldName"],
-            "IgnoreQueryParameterNames": ["QueryParameterName"],
-            "IgnoreSensitiveFieldNames": ["SensitiveFieldNames"],
-            "IgnoreServerVariableNames": ["ServerVariableName"]
-          }
-        }
-      }
-    ]
-  }
-}
-```
+To use the old Raygun Enricher you can follow the [Enricher Readme](https://github.com/MindscapeHQ/serilog-sinks-raygun/blob/master/README-ENRICHER.md) to add the enricher to your project.
 
 ------
 

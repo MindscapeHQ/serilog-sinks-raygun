@@ -10,7 +10,7 @@
         <Company>Serilog</Company>
         <Product>Serilog.Sinks.Raygun</Product>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-        <PackageProjectUrl>http://serilog.net</PackageProjectUrl>
+        <PackageProjectUrl>https://serilog.net</PackageProjectUrl>
         <PackageIcon>serilog-sink-nuget.png</PackageIcon>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/serilog/serilog-sinks-raygun</RepositoryUrl>
@@ -18,8 +18,9 @@
         <Copyright>Copyright © Serilog Contributors 2017-2023</Copyright>
         <Description>Serilog event sink that writes to the Raygun service.</Description>
         <PackageReleaseNotes>https://github.com/MindscapeHQ/serilog-sinks-raygun/blob/master/CHANGE-LOG.md</PackageReleaseNotes>
-        <VersionPrefix>7.3.0</VersionPrefix>
-        <PackageVersion>7.3.0-pre-2</PackageVersion>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <VersionPrefix>7.4.0</VersionPrefix>
+        <PackageVersion>7.4.0-pre-1</PackageVersion>
         <RootNamespace>Serilog</RootNamespace>
     </PropertyGroup>
 
@@ -36,10 +37,11 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Serilog" Version="3.0.0"/>
+        <PackageReference Include="Serilog" Version="2.12.0"/>
     </ItemGroup>
 
     <ItemGroup>
+        <None Include="..\..\README.md" Pack="true" PackagePath="\" />
         <None Include="..\..\serilog-sink-nuget.png" Pack="true" PackagePath="\"/>
     </ItemGroup>
     
