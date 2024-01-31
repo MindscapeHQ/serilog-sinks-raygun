@@ -63,15 +63,31 @@ public class RaygunClientHttpEnricher : ILogEventEnricher
     private const string RaygunRequestMessagePropertyName = "RaygunSink_RequestMessage";
     private const string RaygunResponseMessagePropertyName = "RaygunSink_ResponseMessage";
 
-    readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly LogEventLevel _restrictedToMinimumLevel;
-    private readonly RaygunSettings _raygunSettings;
+    private readonly RaygunRequestMessageOptions _messageOptions; 
 
     public RaygunClientHttpEnricher(IHttpContextAccessor? httpContextAccessor = null, LogEventLevel restrictedToMinimumLevel = LogEventLevel.Error, RaygunSettings? raygunSettings = null)
     {
         _httpContextAccessor = httpContextAccessor ?? new HttpContextAccessor();
         _restrictedToMinimumLevel = restrictedToMinimumLevel;
-        _raygunSettings = raygunSettings ?? new RaygunSettings();
+        
+        var settings = raygunSettings ?? new RaygunSettings();
+        
+        _messageOptions = new RaygunRequestMessageOptions
+        {
+            IsRawDataIgnored = settings.IsRawDataIgnored,
+            UseXmlRawDataFilter = settings.UseXmlRawDataFilter,
+            IsRawDataIgnoredWhenFilteringFailed = settings.IsRawDataIgnoredWhenFilteringFailed,
+            UseKeyValuePairRawDataFilter = settings.UseKeyValuePairRawDataFilter
+        };
+
+        _messageOptions.AddCookieNames(settings.IgnoreCookieNames ?? Array.Empty<string>());
+        _messageOptions.AddHeaderNames(settings.IgnoreHeaderNames ?? Array.Empty<string>());
+        _messageOptions.AddFormFieldNames(settings.IgnoreFormFieldNames ?? Array.Empty<string>());
+        _messageOptions.AddQueryParameterNames(settings.IgnoreQueryParameterNames ?? Array.Empty<string>());
+        _messageOptions.AddSensitiveFieldNames(settings.IgnoreSensitiveFieldNames ?? Array.Empty<string>());
+        _messageOptions.AddServerVariableNames(settings.IgnoreServerVariableNames ?? Array.Empty<string>());
     }
 
     public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
@@ -86,23 +102,8 @@ public class RaygunClientHttpEnricher : ILogEventEnricher
             return;
         }
 
-        var options = new RaygunRequestMessageOptions
-        {
-            IsRawDataIgnored = _raygunSettings.IsRawDataIgnored,
-            UseXmlRawDataFilter = _raygunSettings.UseXmlRawDataFilter,
-            IsRawDataIgnoredWhenFilteringFailed = _raygunSettings.IsRawDataIgnoredWhenFilteringFailed,
-            UseKeyValuePairRawDataFilter = _raygunSettings.UseKeyValuePairRawDataFilter
-        };
-
-        options.AddCookieNames(_raygunSettings.IgnoreCookieNames ?? Array.Empty<string>());
-        options.AddHeaderNames(_raygunSettings.IgnoreHeaderNames ?? Array.Empty<string>());
-        options.AddFormFieldNames(_raygunSettings.IgnoreFormFieldNames ?? Array.Empty<string>());
-        options.AddQueryParameterNames(_raygunSettings.IgnoreQueryParameterNames ?? Array.Empty<string>());
-        options.AddSensitiveFieldNames(_raygunSettings.IgnoreSensitiveFieldNames ?? Array.Empty<string>());
-        options.AddServerVariableNames(_raygunSettings.IgnoreServerVariableNames ?? Array.Empty<string>());
-
         var httpRequestMessage = RaygunAspNetCoreRequestMessageBuilder
-            .Build(_httpContextAccessor.HttpContext, options)
+            .Build(_httpContextAccessor.HttpContext, _messageOptions)
             .GetAwaiter()
             .GetResult();
 
@@ -111,7 +112,7 @@ public class RaygunClientHttpEnricher : ILogEventEnricher
         // The Raygun request/response messages are stored in the logEvent properties collection.
         // When the error is sent to Raygun, these messages are extracted from the known properties
         // and then removed so as to not duplicate data in the payload.
-        logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty(RaygunRequestMessagePropertyName, httpRequestMessage, true));
-        logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty(RaygunResponseMessagePropertyName, httpResponseMessage, true));
+        logEvent.AddOrUpdateProperty(propertyFactory.CreateProperty(RaygunRequestMessagePropertyName, httpRequestMessage, true));
+        logEvent.AddOrUpdateProperty(propertyFactory.CreateProperty(RaygunResponseMessagePropertyName, httpResponseMessage, true));
     }
 }
