@@ -1,5 +1,9 @@
 # Full Change Log for Serilog.Sinks.Raygun package
 
+### v7.5.0
+- Fixed issue in RaygunSink where it was not setting Request/Response messages if supplied by the code Enricher
+- Bumped Raygun.NetCore dependency to 8.2.0 to fix issue where custom RaygunClient with HttpClient could not be used
+
 ### v7.4.0
 - Drop Serilog dependency from 3.0.0 to 2.12.0
 - Include new [Enricher Readme](README-ENRICHER.md) in repo for those who still wish to use the ASP.NET Core Enricher

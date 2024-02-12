@@ -36,6 +36,8 @@ public class RaygunSink : ILogEventSink
     private const string RenderedLogMessageProperty = "RenderedLogMessage";
     private const string LogMessageTemplateProperty = "LogMessageTemplate";
     private const string OccurredProperty = "RaygunSink_OccurredOn";
+    private const string RaygunRequestMessagePropertyName = "RaygunSink_RequestMessage";
+    private const string RaygunResponseMessagePropertyName = "RaygunSink_ResponseMessage";
 
     private readonly IFormatProvider _formatProvider;
     private readonly string _userNameProperty;
@@ -77,7 +79,7 @@ public class RaygunSink : ILogEventSink
         string groupKeyProperty = "GroupKey",
         string tagsProperty = "Tags",
         string userInfoProperty = null,
-        Action<OnBeforeSendArguments> onBeforeSend = null, 
+        Action<OnBeforeSendArguments> onBeforeSend = null,
         RaygunSettings settings = null,
         IRaygunClientProvider raygunClientProvider = null
     )
@@ -92,18 +94,18 @@ public class RaygunSink : ILogEventSink
         _onBeforeSend = onBeforeSend;
         _wrapperExceptions = wrapperExceptions;
         //_ignoredFormFieldNames = ignoredFormFieldNames;
-            
+
         _settings = settings ?? new RaygunSettings
         {
             ApiKey = applicationKey
         };
-            
+
         // In the event they supply RaygunSettings but the api key is not set, we will set it for them
         if (string.IsNullOrWhiteSpace(_settings.ApiKey))
         {
             _settings.ApiKey = applicationKey;
         }
-            
+
         _raygunClientProvider = raygunClientProvider ?? new DefaultRaygunClientProvider();
     }
 
@@ -127,7 +129,7 @@ public class RaygunSink : ILogEventSink
         // }
 
         client.CustomGroupingKey += OnCustomGroupingKey;
-            
+
         return client;
     }
 
@@ -154,12 +156,12 @@ public class RaygunSink : ILogEventSink
 
             properties.Remove(_tagsProperty);
         }
-            
+
         // Decide what exception object to send
         var exception = logEvent.Exception ?? new NullException(GetCurrentExecutionStackTrace());
 
         var client = GetClient();
-            
+
         // Submit
         if (logEvent.Level == LogEventLevel.Fatal)
         {
@@ -252,6 +254,23 @@ public class RaygunSink : ILogEventSink
                     properties.Remove(_groupKeyProperty);
                 }
 
+                // Add Http request/response messages if present and not already set
+                if (details.Request == null &&
+                    properties.TryGetValue(RaygunRequestMessagePropertyName, out var requestMessageProperty) &&
+                    requestMessageProperty is StructureValue requestMessageValue)
+                {
+                    details.Request = BuildRequestMessageFromStructureValue(requestMessageValue);
+                    properties.Remove(RaygunRequestMessagePropertyName);
+                }
+
+                if (details.Response == null &&
+                    properties.TryGetValue(RaygunResponseMessagePropertyName, out var responseMessageProperty) &&
+                    responseMessageProperty is StructureValue responseMessageValue)
+                {
+                    details.Response = BuildResponseMessageFromStructureValue(responseMessageValue);
+                    properties.Remove(RaygunResponseMessagePropertyName);
+                }
+
                 // Simplify the remaining properties to be used as user-custom-data
                 details.UserCustomData = properties
                     .Select(pv => new { Name = pv.Key, Value = RaygunPropertyFormatter.Simplify(pv.Value) })
@@ -297,7 +316,10 @@ public class RaygunSink : ILogEventSink
                     userIdentifier.Identifier = property.AsString();
                     break;
                 case nameof(RaygunIdentifierMessage.IsAnonymous):
-                    userIdentifier.IsAnonymous = "True".Equals(property.Value.ToString());
+                    if (bool.TryParse(property.Value.ToString(), out var isAnonymous))
+                    {
+                        userIdentifier.IsAnonymous = isAnonymous;
+                    }
                     break;
                 case nameof(RaygunIdentifierMessage.Email):
                     userIdentifier.Email = property.AsString();
@@ -364,5 +386,69 @@ public class RaygunSink : ILogEventSink
         }
 
         return userIdentifier;
+    }
+
+    private static RaygunResponseMessage BuildResponseMessageFromStructureValue(StructureValue responseMessageStructure)
+    {
+        var responseMessage = new RaygunResponseMessage();
+
+        foreach (var property in responseMessageStructure.Properties)
+        {
+            switch (property.Name)
+            {
+                case nameof(RaygunResponseMessage.Content):
+                    responseMessage.Content = property.AsString();
+                    break;
+                case nameof(RaygunResponseMessage.StatusCode):
+                    responseMessage.StatusCode = property.AsInteger();
+                    break;
+                case nameof(RaygunResponseMessage.StatusDescription):
+                    responseMessage.StatusDescription = property.AsString();
+                    break;
+            }
+        }
+
+        return responseMessage;
+    }
+
+    private static RaygunRequestMessage BuildRequestMessageFromStructureValue(StructureValue requestMessageStructure)
+    {
+        var requestMessage = new RaygunRequestMessage();
+
+        foreach (var property in requestMessageStructure.Properties)
+        {
+            switch (property.Name)
+            {
+                case nameof(RaygunRequestMessage.Url):
+                    requestMessage.Url = property.AsString();
+                    break;
+                case nameof(RaygunRequestMessage.HostName):
+                    requestMessage.HostName = property.AsString();
+                    break;
+                case nameof(RaygunRequestMessage.HttpMethod):
+                    requestMessage.HttpMethod = property.AsString();
+                    break;
+                case nameof(RaygunRequestMessage.IPAddress):
+                    requestMessage.IPAddress = property.AsString();
+                    break;
+                case nameof(RaygunRequestMessage.RawData):
+                    requestMessage.RawData = property.AsString();
+                    break;
+                case nameof(RaygunRequestMessage.Headers):
+                    requestMessage.Headers = property.AsDictionary();
+                    break;
+                case nameof(RaygunRequestMessage.QueryString):
+                    requestMessage.QueryString = property.AsDictionary();
+                    break;
+                case nameof(RaygunRequestMessage.Form):
+                    requestMessage.Form = property.AsDictionary();
+                    break;
+                case nameof(RaygunRequestMessage.Data):
+                    requestMessage.Data = property.AsDictionary();
+                    break;
+            }
+        }
+
+        return requestMessage;
     }
 }
