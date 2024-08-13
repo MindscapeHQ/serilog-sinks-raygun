@@ -4,10 +4,12 @@
         <TargetFramework>net6.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <Version>2.3.4.5</Version>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Mindscape.Raygun4Net.AspNetCore" Version="8.2.0" />
+        <PackageReference Include="Mindscape.Raygun4Net.NetCore.Common" Version="11.0.4-pre-1" />
+        <PackageReference Include="Mindscape.Raygun4Net.AspNetCore" Version="11.0.4-pre-1" />
         <PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
         <PackageReference Include="Serilog.Sinks.Console" Version="5.0.0" />
     </ItemGroup>

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Serilog.Sinks.Raygun.SampleWebApp.Models;
 
@@ -43,6 +44,28 @@ public class HomeController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Captured an error");
+        }
+
+        return Content("HI");
+    }
+    
+    public IActionResult ThrowWithUser()
+    {
+        // login user (faked)
+        HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
+        {
+            new(ClaimTypes.Name, "test"),
+            new(ClaimTypes.Email, "hello-world@banana.com"),
+            new(ClaimTypes.Role, "Admin")
+        }, "Test"));
+        
+        try
+        {
+            throw new Exception("An exception with a user i hope....");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Captured an error with custom data {Thing}", "Banana");
         }
 
         return Content("HI");

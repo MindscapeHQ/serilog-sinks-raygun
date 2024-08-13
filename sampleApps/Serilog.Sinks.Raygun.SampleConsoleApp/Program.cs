@@ -1,8 +1,10 @@
-﻿using Serilog;
+﻿using Mindscape.Raygun4Net;
+using Serilog;
 using Serilog.Events;
 
 Console.Out.WriteLine("Please enter your Raygun application key: ");
 var raygunApiKey = Console.In.ReadLine();
+
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Verbose()
@@ -17,15 +19,19 @@ Log.Logger = new LoggerConfiguration()
         "CustomGroupKeyProperty",
         "CustomTagsProperty",
         "CustomUserInfoProperty",
-        onBeforeSendArguments =>
+        // onBeforeSendArguments =>
+        // {
+        //     Console.Out.WriteLine("OnBeforeSend called with the following arguments: " + onBeforeSendArguments);
+        //     //Updating machine name
+        //     onBeforeSendArguments.RaygunMessage.Details.MachineName = "Serilog.Sinks.Raygun.SampleConsoleApp Machine";
+        //
+        //     //Testing throwing an exception in Action
+        //     throw new Exception("Exception thrown in callback action..");
+        //     
+        // }, 
+        settings: new RaygunSettings
         {
-            Console.Out.WriteLine("OnBeforeSend called with the following arguments: " + onBeforeSendArguments);
-            //Updating machine name
-            onBeforeSendArguments.RaygunMessage.Details.MachineName = "Serilog.Sinks.Raygun.SampleConsoleApp Machine";
-
-            //Testing throwing an exception in Action
-            throw new Exception("Exception thrown in callback action..");
-            
+            //ApiEndpoint = new Uri("http://127.0.0.1:5000/entries")
         })
     .CreateLogger();
 
@@ -42,6 +48,6 @@ catch (Exception e)
 Log.CloseAndFlush();
 
 //A Thread.Sleep is normally not necessary. Adding it here because the app is too small and there might not be enough time to send the errors to Raygun because of the asynchronous Send method used 
-Thread.Sleep(1000); 
+Thread.Sleep(1000);
 
 Console.Out.WriteLine("All done! Please check your Raygun App to ensure the two logged exceptions appear");

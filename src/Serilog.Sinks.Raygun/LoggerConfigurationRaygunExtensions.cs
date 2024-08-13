@@ -33,9 +33,9 @@ public static class LoggerConfigurationRaygunExtensions
     /// <param name="loggerConfiguration">The logger configuration.</param>
     /// <param name="applicationKey">The application key as found on an application in your Raygun account.</param>
     /// <param name="wrapperExceptions">If you have common outer exceptions that wrap a valuable inner exception which you'd prefer to group by, you can specify these by providing a list.</param>
-    /// <param name="userNameProperty">Specifies the property name to read the username from. By default it is UserName. Set to null if you do not want to use this feature.</param>
+    /// <param name="userNameProperty">Specifies the property name to read the username from. By default, it is UserName. Set to null if you do not want to use this feature.</param>
     /// <param name="applicationVersionProperty">Specifies the property to use to retrieve the application version from. You can use an enricher to add the application version to all the log events. When you specify null, Raygun will use the assembly version.</param> 
-    /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink. By default set to Error as Raygun is mostly used for error reporting.</param>
+    /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink. By default, set to Error as Raygun is mostly used for error reporting.</param>
     /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
     /// <param name="tags">Specifies the tags to include with every log message. The log level will always be included as a tag.</param>
     /// <param name="ignoredFormFieldNames">Specifies the form field names which to ignore when including request form data.</param>
@@ -84,4 +84,27 @@ public static class LoggerConfigurationRaygunExtensions
             settings,
             raygunClientProvider), restrictedToMinimumLevel);
     }
+
+#if NET
+    /// <summary>
+    /// Adds a sink that writes log events (defaults to error and up) to the Raygun service. Properties and the log message are being attached as UserCustomData and the level is included as a Tag.
+    /// Your message is part of the custom data.
+    /// </summary>
+    /// <param name="loggerConfiguration">The logger configuration.</param>
+    /// <param name="raygunClient">Instance of RaygunClient which should be passed in by resolving from a DI container or a static instance.</param>
+    /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+    /// <param name="tags">Specifies the tags to include with every log message. The log level will always be included as a tag.</param> 
+    /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink. By default, set to Error as Raygun is mostly used for error reporting.</param>
+    /// <returns>Logger configuration, allowing configuration to continue.</returns>
+    /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
+    // This sink only exists for .NET Core as it is intended to be used with DI.
+    public static LoggerConfiguration Raygun(this LoggerSinkConfiguration loggerConfiguration,
+        RaygunClientBase raygunClient,
+        IFormatProvider formatProvider = null,
+        IEnumerable<string> tags = null,
+        LogEventLevel restrictedToMinimumLevel = LogEventLevel.Error)
+    {
+        return loggerConfiguration.Sink(new RaygunSinkV2(raygunClient, formatProvider, tags), restrictedToMinimumLevel);
+    }
+#endif
 }

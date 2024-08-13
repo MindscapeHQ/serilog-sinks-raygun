@@ -19,8 +19,8 @@
         <Description>Serilog event sink that writes to the Raygun service.</Description>
         <PackageReleaseNotes>https://github.com/MindscapeHQ/serilog-sinks-raygun/blob/master/CHANGE-LOG.md</PackageReleaseNotes>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <VersionPrefix>7.5.0</VersionPrefix>
-        <PackageVersion>7.5.0-pre-1</PackageVersion>
+        <VersionPrefix>7.6.0</VersionPrefix>
+        <PackageVersion>7.6.0-pre-1</PackageVersion>
         <RootNamespace>Serilog</RootNamespace>
     </PropertyGroup>
 
@@ -28,11 +28,11 @@
                           '$(TargetFramework)' == 'net6.0' or 
                           '$(TargetFramework)' == 'net5.0' or 
                           '$(TargetFramework)' == 'netstandard2.0'">
-        <PackageReference Include="Mindscape.Raygun4Net.NetCore" Version="8.2.0"/>
+        <PackageReference Include="Mindscape.Raygun4Net.NetCore" Version="11.0.4-pre-1"/>
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
-        <PackageReference Include="Mindscape.Raygun4Net" Version="8.0.0"/>
+        <PackageReference Include="Mindscape.Raygun4Net" Version="11.0.4-pre-1"/>
         <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net462" Version="1.0.3"/>
     </ItemGroup>
 
