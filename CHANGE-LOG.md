@@ -2,6 +2,7 @@
 
 ### v7.6.0
 - Updated Raygun4Net dependency
+- Added `ApplicationBuilderExtensions` to allow `AddRaygun(...)` for use in Console/Services
 - Implemented new `RaygunSinkV2` which is cut down but supports using whatever RaygunClient is registered via DI
   - This treats RaygunClient as a singleton and uses it to send messages
   - Adds support for using Raygun4Net.AspNetCore package to register RaygunClient in DI
