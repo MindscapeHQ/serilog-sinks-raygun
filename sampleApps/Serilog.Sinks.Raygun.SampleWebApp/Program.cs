@@ -1,10 +1,5 @@
-using Mindscape.Raygun4Net;
 using Mindscape.Raygun4Net.AspNetCore;
-
 using Serilog;
-using Serilog.Sinks.Raygun;
-using RaygunClient = Mindscape.Raygun4Net.AspNetCore.RaygunClient;
-using RaygunClientBase = Mindscape.Raygun4Net.RaygunClientBase;
 
 var apiKey = Environment.GetEnvironmentVariable("RAYGUN_APIKEY") ?? "";
 
@@ -12,9 +7,7 @@ Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
     .Enrich.With(new RaygunClientHttpEnricher())
     .WriteTo.Console()
-    //.WriteTo.Raygun(apiKey)
     .CreateLogger();
-
 
 try
 {
@@ -33,7 +26,6 @@ try
     });
 
     var app = builder.Build();
-
 
     // Configure the HTTP request pipeline.
     if (!app.Environment.IsDevelopment())
