@@ -48,7 +48,6 @@ public class RaygunSink : ILogEventSink
     private readonly string _userInfoProperty;
     private readonly Action<OnBeforeSendArguments> _onBeforeSend;
     private readonly IEnumerable<Type> _wrapperExceptions;
-    //private readonly IEnumerable<string> _ignoredFormFieldNames;
 
     private readonly RaygunSettings _settings;
     private readonly IRaygunClientProvider _raygunClientProvider;
@@ -93,7 +92,6 @@ public class RaygunSink : ILogEventSink
         _userInfoProperty = userInfoProperty;
         _onBeforeSend = onBeforeSend;
         _wrapperExceptions = wrapperExceptions;
-        //_ignoredFormFieldNames = ignoredFormFieldNames;
 
         _settings = settings ?? new RaygunSettings
         {
@@ -121,12 +119,6 @@ public class RaygunSink : ILogEventSink
         {
             client.AddWrapperExceptions(_wrapperExceptions.ToArray());
         }
-
-        // TODO: Figure out how we can 'ignore' form field names on mobile platforms
-        // if (_ignoredFormFieldNames != null)
-        // {
-        //     client.IgnoreFormFieldNames(_ignoredFormFieldNames.ToArray());
-        // }
 
         client.CustomGroupingKey += OnCustomGroupingKey;
 

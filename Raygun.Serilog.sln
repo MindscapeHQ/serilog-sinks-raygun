@@ -15,6 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionIt
 		LICENSE = LICENSE
 		README.md = README.md
 		README-ENRICHER.md = README-ENRICHER.md
+		README-NET-FRAMEWORK.md = README-NET-FRAMEWORK.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.Raygun.SampleWebApp", "sampleApps\Serilog.Sinks.Raygun.SampleWebApp\Serilog.Sinks.Raygun.SampleWebApp.csproj", "{73E023EF-23CD-4450-AD12-6C37DC8ACB18}"

@@ -49,6 +49,21 @@ public class HomeController : Controller
         return Content("HI");
     }
     
+    public IActionResult LogCritical()
+    {
+        try
+        {
+            throw new Exception("Serilog.Sinks.Raygun.SampleWebApp");
+        }
+        catch (Exception ex)
+        {
+            //_logger.LogCritical(ex, "Captured fatal error");
+            Log.Fatal(ex, "Logging fatal error");
+        }
+
+        return Content("HI");
+    }
+    
     public IActionResult ThrowWithUser()
     {
         // login user (faked)

@@ -22,17 +22,14 @@ Log.Logger = new LoggerConfiguration()
         // onBeforeSendArguments =>
         // {
         //     Console.Out.WriteLine("OnBeforeSend called with the following arguments: " + onBeforeSendArguments);
+        //
         //     //Updating machine name
         //     onBeforeSendArguments.RaygunMessage.Details.MachineName = "Serilog.Sinks.Raygun.SampleConsoleApp Machine";
         //
         //     //Testing throwing an exception in Action
         //     throw new Exception("Exception thrown in callback action..");
-        //     
         // }, 
-        settings: new RaygunSettings
-        {
-            //ApiEndpoint = new Uri("http://127.0.0.1:5000/entries")
-        })
+        settings: new RaygunSettings())
     .CreateLogger();
 
 try
