@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>dotnet-Serilog.Sinks.Raygun.SampleServiceApp-2443ca1d-bffb-4588-a819-f1bfc35c6170</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Mindscape.Raygun4Net.NetCore.Common" Version="11.1.0" />
+        <PackageReference Include="Mindscape.Raygun4Net.NetCore" Version="11.1.0" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1"/>
+        <PackageReference Include="Serilog" Version="2.12.0" />
+        <PackageReference Include="Serilog.Extensions.Hosting" Version="3.1.0" />
+        <PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Serilog.Sinks.Raygun\Serilog.Sinks.Raygun.csproj" />
+    </ItemGroup>
+</Project>

@@ -26,17 +26,16 @@ namespace Serilog.Sinks.Raygun;
 /// </summary>
 internal static class RaygunPropertyFormatter
 {
-    private static readonly HashSet<Type> RaygunScalars = new()
-    {
+    private static readonly HashSet<Type> RaygunScalars =
+    [
         typeof(bool),
         typeof(byte), typeof(short), typeof(ushort), typeof(int), typeof(uint),
         typeof(long), typeof(ulong), typeof(float), typeof(double), typeof(decimal),
         typeof(byte[])
-    };
+    ];
 
     /// <summary>
-    /// Simplify the object so as to make handling the serialized
-    /// representation easier.
+    /// Simplify the object to make handling the serialized representation easier.
     /// </summary>
     /// <param name="value">The value to simplify (possibly null).</param>
     /// <returns>A simplified representation.</returns>

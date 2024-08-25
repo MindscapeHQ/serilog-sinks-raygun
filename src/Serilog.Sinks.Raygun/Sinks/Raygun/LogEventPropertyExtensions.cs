@@ -8,13 +8,13 @@ public static class LogEventPropertyExtensions
 {
     public static string AsString(this LogEventPropertyValue propertyValue)
     {
-        if (!(propertyValue is ScalarValue scalar))
+        if (propertyValue is not ScalarValue scalar)
         {
             return null;
         }
 
         // Handle string values differently as the ToString() method will wrap the string in unwanted quotes
-        return scalar.Value is string s ? s : scalar.ToString();
+        return scalar.Value as string ?? scalar.ToString();
     }
 
     public static string AsString(this LogEventProperty property)
@@ -31,18 +31,17 @@ public static class LogEventPropertyExtensions
             return defaultIfNull;
         }
 
-        return int.TryParse(property.Value.AsString(), out int result) ? result : defaultIfNull;
+        return int.TryParse(property.Value.AsString(), out var result) ? result : defaultIfNull;
     }
 
     public static IDictionary AsDictionary(this LogEventProperty property)
     {
-        if (!(property.Value is DictionaryValue value))
+        if (property.Value is not DictionaryValue value)
         {
             return null;
         }
 
-        return value.Elements.ToDictionary(
-            kv => kv.Key.AsString(),
+        return value.Elements.ToDictionary(kv => kv.Key.AsString(),
             kv => kv.Value is ScalarValue scalarValue ? scalarValue.Value : kv.Value);
     }
 }
