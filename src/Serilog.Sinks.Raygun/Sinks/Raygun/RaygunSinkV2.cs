@@ -71,7 +71,7 @@ public class RaygunSinkV2 : ILogEventSink
         // Submit
         if (logEvent.Level == LogEventLevel.Fatal)
         {
-            // Fail is prob going to crash the app so let's try to send the log to raygun synchronously
+            // Fatal is prob going to crash the app so let's try to send the log to raygun synchronously
             _raygunClient.SendAsync(exception, tags, properties).GetAwaiter().GetResult();
         }
         else
