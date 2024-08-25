@@ -15,7 +15,7 @@ namespace Serilog.Sinks.Raygun;
 /// <summary>
 /// RaygunSink for Serilog which handles logging to Raygun.
 /// </summary>
-public class RaygunSinkV2 : ILogEventSink
+public class RaygunClientSink : ILogEventSink
 {
     private const string RenderedLogMessageProperty = "RenderedLogMessage";
     private const string LogMessageTemplateProperty = "LogMessageTemplate";
@@ -34,7 +34,7 @@ public class RaygunSinkV2 : ILogEventSink
     /// <param name="raygunClient">Instance of RaygunClient which should be passed in by resolving from a DI container or a static instance.</param>
     /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
     /// <param name="tags">Specifies the tags to include with every log message. The log level will always be included as a tag.</param>
-    public RaygunSinkV2(RaygunClientBase raygunClient,
+    public RaygunClientSink(RaygunClientBase raygunClient,
         IFormatProvider? formatProvider = null,
         IEnumerable<string>? tags = null
     )

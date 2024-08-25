@@ -4,13 +4,13 @@
 ### v8.0.0
 - Updated Raygun4Net dependency
 - Added `ApplicationBuilderExtensions` to allow `AddRaygun(...)` for use in Console/Services
-- Implemented new `RaygunSinkV2` which is cut down but supports using whatever RaygunClient is registered via DI
+- Implemented new `RaygunClientSink` which is cut down but supports using whatever RaygunClient is registered via DI
   - This treats RaygunClient as a singleton and uses it to send messages
   - Adds support for using Raygun4Net.AspNetCore package to register RaygunClient in DI
   - Adds support for `IRaygunUserProvider` to be registered in DI
   - See: https://github.com/MindscapeHQ/serilog-sinks-raygun/pull/71
 - Notes: RaygunSink is left unchanged, this should not be a breaking change for anyone using the package as it is, 
-         but the new `RaygunSinkV2` is available for those who wish to use it. The new sink is more flexible and allows 
+         but the new `RaygunClientSink` is available for those who wish to use it. The new sink is more flexible and allows 
          for custom RaygunClient instances to be used.
 
 ### v7.5.0

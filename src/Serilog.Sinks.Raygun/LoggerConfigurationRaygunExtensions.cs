@@ -104,7 +104,7 @@ public static class LoggerConfigurationRaygunExtensions
         IEnumerable<string> tags = null,
         LogEventLevel restrictedToMinimumLevel = LogEventLevel.Error)
     {
-        return loggerConfiguration.Sink(new RaygunSinkV2(raygunClient, formatProvider, tags), restrictedToMinimumLevel);
+        return loggerConfiguration.Sink(new RaygunClientSink(raygunClient, formatProvider, tags), restrictedToMinimumLevel);
     }
 #endif
 }
