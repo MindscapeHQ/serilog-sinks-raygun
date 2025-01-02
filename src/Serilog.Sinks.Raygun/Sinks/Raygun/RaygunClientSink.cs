@@ -24,6 +24,7 @@ public class RaygunClientSink : ILogEventSink
     private const string RaygunResponseMessagePropertyName = "RaygunSink_ResponseMessage";
 
     private readonly IFormatProvider? _formatProvider;
+    private readonly bool _logWithoutException;
     private readonly IEnumerable<string> _tags;
 
     private readonly RaygunClientBase _raygunClient;
@@ -34,13 +35,16 @@ public class RaygunClientSink : ILogEventSink
     /// <param name="raygunClient">Instance of RaygunClient which should be passed in by resolving from a DI container or a static instance.</param>
     /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
     /// <param name="tags">Specifies the tags to include with every log message. The log level will always be included as a tag.</param>
+    /// <param name="logWithoutException">Allows error logs without an Exception to be sent to Raygun.</param>
     public RaygunClientSink(RaygunClientBase raygunClient,
         IFormatProvider? formatProvider = null,
-        IEnumerable<string>? tags = null
+        IEnumerable<string>? tags = null,
+        bool logWithoutException = false
     )
     {
         _raygunClient = raygunClient;
         _formatProvider = formatProvider;
+        _logWithoutException = logWithoutException;
         _tags = tags ?? Array.Empty<string>();
         
         _raygunClient.CustomGroupingKey += OnCustomGroupingKey;
@@ -56,8 +60,14 @@ public class RaygunClientSink : ILogEventSink
     /// <param name="logEvent">The log event to write.</param>
     public void Emit(LogEvent logEvent)
     {
+        // If there is no exception, and we are not logging without exception, then we don't want to send the log to Raygun.
+        if (logEvent.Exception == null && !_logWithoutException)
+        {
+            return;
+        }
+        
         // Include the log level as a tag.
-        var tags = _tags.Concat(new[] { logEvent.Level.ToString() }).ToList();
+        var tags = _tags.Concat([logEvent.Level.ToString()]).ToList();
         var properties = logEvent.Properties.ToDictionary(kv => kv.Key, kv => kv.Value);
 
         // Add the message and template to the properties

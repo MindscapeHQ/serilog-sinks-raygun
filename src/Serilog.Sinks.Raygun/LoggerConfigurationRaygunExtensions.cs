@@ -95,6 +95,7 @@ public static class LoggerConfigurationRaygunExtensions
     /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
     /// <param name="tags">Specifies the tags to include with every log message. The log level will always be included as a tag.</param> 
     /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink. By default, set to Error as Raygun is mostly used for error reporting.</param>
+    /// <param name="logWithoutException">Allows error logs without an Exception to be sent to Raygun.</param>
     /// <returns>Logger configuration, allowing configuration to continue.</returns>
     /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
     // This sink only exists for .NET Core as it is intended to be used with DI.
@@ -102,9 +103,10 @@ public static class LoggerConfigurationRaygunExtensions
         RaygunClientBase raygunClient,
         IFormatProvider formatProvider = null,
         IEnumerable<string> tags = null,
-        LogEventLevel restrictedToMinimumLevel = LogEventLevel.Error)
+        LogEventLevel restrictedToMinimumLevel = LogEventLevel.Error,
+        bool logWithoutException = false)
     {
-        return loggerConfiguration.Sink(new RaygunClientSink(raygunClient, formatProvider, tags), restrictedToMinimumLevel);
+        return loggerConfiguration.Sink(new RaygunClientSink(raygunClient, formatProvider, tags, logWithoutException), restrictedToMinimumLevel);
     }
 #endif
 }
