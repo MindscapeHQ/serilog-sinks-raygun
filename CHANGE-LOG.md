@@ -1,5 +1,10 @@
 # Full Change Log for Serilog.Sinks.Raygun package
 
+### v8.1.0
+- Added flag for .NET Core Sink to allow/disallow Error Logs with no Exception being sent to Raygun
+  - This is to allow for more control over what is sent to Raygun
+  - Default is false and will not send Error Logs that have no exception to Raygun
+  - See:
 
 ### v8.0.0
 - Updated Raygun4Net dependency
