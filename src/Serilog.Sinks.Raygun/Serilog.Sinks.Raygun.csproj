@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net7.0;net6.0;net5.0;net462;netstandard2.0</TargetFrameworks>
+        <TargetFrameworks>net9.0;net8.0;net7.0;net6.0;net5.0;net462;netstandard2.0</TargetFrameworks>
         <LangVersion>latest</LangVersion>
         <OutputType>Library</OutputType>
         
@@ -15,7 +15,7 @@
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/serilog/serilog-sinks-raygun</RepositoryUrl>
         <PackageTags>serilog;sink;raygun;crash;exception-handling;exception-reporting;exception-handler;unhandled-exceptions;debugging;debug;bug;bugs;exceptions;error;errors;crash-reporting;aspnet-core</PackageTags>
-        <Copyright>Copyright © Serilog Contributors 2017-2023</Copyright>
+        <Copyright>Copyright © Serilog Contributors 2017-2025</Copyright>
         <Description>Serilog event sink that writes to the Raygun service.</Description>
         <PackageReleaseNotes>https://github.com/MindscapeHQ/serilog-sinks-raygun/blob/master/CHANGE-LOG.md</PackageReleaseNotes>
         <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -24,7 +24,9 @@
         <RootNamespace>Serilog</RootNamespace>
     </PropertyGroup>
 
-    <ItemGroup Condition="'$(TargetFramework)' == 'net7.0' or 
+    <ItemGroup Condition="'$(TargetFramework)' == 'net9.0' or 
+                          '$(TargetFramework)' == 'net8.0' or 
+                          '$(TargetFramework)' == 'net7.0' or 
                           '$(TargetFramework)' == 'net6.0' or 
                           '$(TargetFramework)' == 'net5.0' or 
                           '$(TargetFramework)' == 'netstandard2.0'">
