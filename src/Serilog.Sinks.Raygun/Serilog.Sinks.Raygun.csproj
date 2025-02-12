@@ -20,7 +20,7 @@
         <PackageReleaseNotes>https://github.com/MindscapeHQ/serilog-sinks-raygun/blob/master/CHANGE-LOG.md</PackageReleaseNotes>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <VersionPrefix>8.2.0</VersionPrefix>
-        <PackageVersion>8.2.0-pre1</PackageVersion>
+        <PackageVersion>8.2.0</PackageVersion>
         <RootNamespace>Serilog</RootNamespace>
     </PropertyGroup>
 
