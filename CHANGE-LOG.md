@@ -1,5 +1,8 @@
 # Full Change Log for Serilog.Sinks.Raygun package
 
+### v8.1.0
+- Updated `RaygunClientSink` to support extracting "Tags" from emitted log event properties
+- See: https://github.com/MindscapeHQ/serilog-sinks-raygun/pull/73
 
 ### v8.0.0
 - Updated Raygun4Net dependency
