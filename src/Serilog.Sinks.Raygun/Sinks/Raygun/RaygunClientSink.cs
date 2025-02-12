@@ -25,6 +25,7 @@ public class RaygunClientSink : ILogEventSink
 
     private readonly IFormatProvider? _formatProvider;
     private readonly IEnumerable<string> _tags;
+    private readonly string _tagsProperty;
 
     private readonly RaygunClientBase _raygunClient;
 
@@ -34,14 +35,17 @@ public class RaygunClientSink : ILogEventSink
     /// <param name="raygunClient">Instance of RaygunClient which should be passed in by resolving from a DI container or a static instance.</param>
     /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
     /// <param name="tags">Specifies the tags to include with every log message. The log level will always be included as a tag.</param>
+    /// <param name="tagsProperty">The property where additional tags are stored when emitting log events.</param>
     public RaygunClientSink(RaygunClientBase raygunClient,
         IFormatProvider? formatProvider = null,
-        IEnumerable<string>? tags = null
+        IEnumerable<string>? tags = null,
+        string tagsProperty = "Tags"
     )
     {
         _raygunClient = raygunClient;
         _formatProvider = formatProvider;
         _tags = tags ?? Array.Empty<string>();
+        _tagsProperty = tagsProperty;
         
         _raygunClient.CustomGroupingKey += OnCustomGroupingKey;
 
@@ -57,13 +61,21 @@ public class RaygunClientSink : ILogEventSink
     public void Emit(LogEvent logEvent)
     {
         // Include the log level as a tag.
-        var tags = _tags.Concat(new[] { logEvent.Level.ToString() }).ToList();
+        var tags = _tags.Concat([logEvent.Level.ToString()]).ToList();
         var properties = logEvent.Properties.ToDictionary(kv => kv.Key, kv => kv.Value);
 
         // Add the message and template to the properties
         properties[RenderedLogMessageProperty] = new ScalarValue(logEvent.RenderMessage(_formatProvider));
         properties[LogMessageTemplateProperty] = new ScalarValue(logEvent.MessageTemplate.Text);
         properties[OccurredProperty] = new ScalarValue(logEvent.Timestamp.UtcDateTime);
+        
+        // Add additional custom tags
+        if (properties.TryGetValue(_tagsProperty, out var eventTags) && eventTags is SequenceValue tagsSequence)
+        {
+            tags.AddRange(tagsSequence.Elements.Select(t => t.ToString("l", null)));
+
+            properties.Remove(_tagsProperty);
+        }
 
         // Decide what exception object to send
         var exception = logEvent.Exception ?? new NullException(GetCurrentExecutionStackTrace());
