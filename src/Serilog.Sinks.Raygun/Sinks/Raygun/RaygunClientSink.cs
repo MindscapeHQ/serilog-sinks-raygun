@@ -8,7 +8,6 @@ using System.Reflection;
 using Serilog.Core;
 using Serilog.Events;
 using Mindscape.Raygun4Net;
-using Mindscape.Raygun4Net.Messages;
 
 namespace Serilog.Sinks.Raygun;
 
@@ -29,7 +28,6 @@ public class RaygunClientSink : ILogEventSink
     private readonly IEnumerable<string> _tags;
     private readonly string _tagsProperty;
     private readonly Func<LogEvent, RaygunIdentifierMessage?>? _userInfoCallback;
-
     private readonly RaygunClientBase _raygunClient;
 
     /// <summary>
@@ -81,7 +79,7 @@ public class RaygunClientSink : ILogEventSink
             var userInfo = _userInfoCallback(logEvent);
             if (userInfo != null)
             {
-                properties[RaygunUserInfoPropertyName] = BuildUserInfoStructureValue(userInfo);
+                properties[RaygunUserInfoPropertyName] = new ScalarValue(userInfo); // Store as simple scalar
             }
         }
 
@@ -111,21 +109,50 @@ public class RaygunClientSink : ILogEventSink
 
     private void OnCustomGroupingKey(object? sender, RaygunCustomGroupingKeyEventArgs e)
     {
-        if (e.Message?.Details != null)
+        // Delegate processing to the static method
+        ProcessRaygunMessageDetails(e.Message, e.Exception);
+    }
+
+    // Extracted core logic for testability
+    public static void ProcessRaygunMessageDetails(RaygunMessage message, Exception exception)
+    {
+        if (message?.Details != null)
         {
-            var details = e.Message.Details;
+            var details = message.Details;
     
             details.Client = new RaygunClientMessage
             {
                 Name = "RaygunSerilogSink",
-                Version = GetType().Assembly.GetName().Version?.ToString() ?? string.Empty,
+                Version = typeof(RaygunClientSink).Assembly.GetName().Version?.ToString() ?? string.Empty,
                 ClientUrl = "https://github.com/serilog/serilog-sinks-raygun"
             };
     
-            if (details.UserCustomData is Dictionary<string, LogEventPropertyValue> properties)
+            // Handle both the internal Dictionary<,> and potential Hashtable/IDictionary from tests
+            Dictionary<string, LogEventPropertyValue>? properties = null;
+            if (details.UserCustomData is Dictionary<string, LogEventPropertyValue> dictProperties)
+            {
+                properties = dictProperties;
+            }
+            else if (details.UserCustomData is System.Collections.IDictionary dictionaryData)
+            {
+                // Attempt to convert IDictionary to the expected type if possible
+                try
+                {
+                    properties = dictionaryData.Keys.Cast<object>()
+                        .ToDictionary(k => k.ToString() ?? "", k => dictionaryData[k] as LogEventPropertyValue ?? new ScalarValue(dictionaryData[k]));
+                }
+                catch (Exception ex) // Catch potential casting/conversion errors
+                {
+                    // Log internally? Or ignore if conversion fails?
+                    // For now, let's proceed with properties as null if conversion fails.
+                    Debug.WriteLine($"Error converting UserCustomData IDictionary: {ex.Message}");
+                }
+            }
+
+            if (properties != null)
             {
                 // If an Exception has not been provided, then use the log message/template to fill in the details and attach the current execution stack
-                if (e.Exception is NullException nullException)
+                if (exception is NullException nullException)
                 {
                     details.Error = new RaygunErrorMessage
                     {
@@ -138,7 +165,7 @@ public class RaygunClientSink : ILogEventSink
                 if (properties.TryGetValue(OccurredProperty, out var occurredOnPropertyValue) &&
                     occurredOnPropertyValue is ScalarValue { Value: DateTime occurredOn })
                 {
-                    e.Message.OccurredOn = occurredOn;
+                    message.OccurredOn = occurredOn;
     
                     properties.Remove(OccurredProperty);
                 }
@@ -322,4 +349,5 @@ public class RaygunClientSink : ILogEventSink
         return userInfo;
     }
 }
+
 #endif
