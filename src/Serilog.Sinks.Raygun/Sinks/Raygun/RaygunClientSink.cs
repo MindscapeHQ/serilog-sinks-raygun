@@ -27,7 +27,6 @@ public class RaygunClientSink : ILogEventSink
     private readonly IFormatProvider? _formatProvider;
     private readonly IEnumerable<string> _tags;
     private readonly string _tagsProperty;
-    private readonly Func<LogEvent, RaygunIdentifierMessage?>? _userInfoCallback;
     private readonly RaygunClientBase _raygunClient;
 
     /// <summary>
@@ -37,19 +36,16 @@ public class RaygunClientSink : ILogEventSink
     /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
     /// <param name="tags">Specifies the tags to include with every log message. The log level will always be included as a tag.</param>
     /// <param name="tagsProperty">The property where additional tags are stored when emitting log events.</param>
-    /// <param name="userInfoCallback">A function to extract user information from the log event.</param>
     public RaygunClientSink(RaygunClientBase raygunClient,
         IFormatProvider? formatProvider = null,
         IEnumerable<string>? tags = null,
-        string tagsProperty = "Tags",
-        Func<LogEvent, RaygunIdentifierMessage?>? userInfoCallback = null
+        string tagsProperty = "Tags"
     )
     {
         _raygunClient = raygunClient;
         _formatProvider = formatProvider;
         _tags = tags ?? Array.Empty<string>();
         _tagsProperty = tagsProperty;
-        _userInfoCallback = userInfoCallback;
 
         _raygunClient.CustomGroupingKey += OnCustomGroupingKey;
 
@@ -72,16 +68,6 @@ public class RaygunClientSink : ILogEventSink
         properties[RenderedLogMessageProperty] = new ScalarValue(logEvent.RenderMessage(_formatProvider));
         properties[LogMessageTemplateProperty] = new ScalarValue(logEvent.MessageTemplate.Text);
         properties[OccurredProperty] = new ScalarValue(logEvent.Timestamp.UtcDateTime);
-        
-        // Add user info if callback is provided
-        if (_userInfoCallback != null)
-        {
-            var userInfo = _userInfoCallback(logEvent);
-            if (userInfo != null)
-            {
-                properties[RaygunUserInfoPropertyName] = new ScalarValue(userInfo); // Store as simple scalar
-            }
-        }
 
         // Add additional custom tags
         if (properties.TryGetValue(_tagsProperty, out var eventTags) && eventTags is SequenceValue tagsSequence)

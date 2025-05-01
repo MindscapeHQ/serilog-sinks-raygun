@@ -87,7 +87,13 @@ namespace Serilog.Sinks.Raygun.Tests.Sinks.Raygun
             RaygunClientSink.ProcessRaygunMessageDetails(message, _logEvent.Exception ?? new Exception("test"));
 
             // Assert
-            Assert.IsNull(message.Details.User);
+            Assert.IsNotNull(message.Details.User);
+            Assert.AreEqual(expectedUser.Identifier, message.Details.User.Identifier);
+            Assert.AreEqual(expectedUser.Email, message.Details.User.Email);
+            Assert.AreEqual(expectedUser.FullName, message.Details.User.FullName);
+            Assert.AreEqual(expectedUser.FirstName, message.Details.User.FirstName);
+            Assert.AreEqual(expectedUser.UUID, message.Details.User.UUID);
+            Assert.AreEqual(expectedUser.IsAnonymous, message.Details.User.IsAnonymous);
         }
 
         [Test]
