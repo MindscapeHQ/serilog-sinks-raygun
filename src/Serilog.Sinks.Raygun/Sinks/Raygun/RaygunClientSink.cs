@@ -259,21 +259,32 @@ public class RaygunClientSink : ILogEventSink
         return requestMessage;
     }
 
+    // Added helper method to convert RaygunIdentifierMessage to StructureValue
     private static StructureValue BuildUserInfoStructureValue(RaygunIdentifierMessage userInfo)
     {
         var properties = new List<LogEventProperty>();
 
         if (userInfo.Identifier != null)
+        {
             properties.Add(new LogEventProperty(nameof(RaygunIdentifierMessage.Identifier), new ScalarValue(userInfo.Identifier)));
+        }
         properties.Add(new LogEventProperty(nameof(RaygunIdentifierMessage.IsAnonymous), new ScalarValue(userInfo.IsAnonymous)));
         if (userInfo.Email != null)
+        {
             properties.Add(new LogEventProperty(nameof(RaygunIdentifierMessage.Email), new ScalarValue(userInfo.Email)));
+        }
         if (userInfo.FullName != null)
+        {
             properties.Add(new LogEventProperty(nameof(RaygunIdentifierMessage.FullName), new ScalarValue(userInfo.FullName)));
+        }
         if (userInfo.FirstName != null)
+        {
             properties.Add(new LogEventProperty(nameof(RaygunIdentifierMessage.FirstName), new ScalarValue(userInfo.FirstName)));
+        }
         if (userInfo.UUID != null)
+        {
             properties.Add(new LogEventProperty(nameof(RaygunIdentifierMessage.UUID), new ScalarValue(userInfo.UUID)));
+        }
 
         return new StructureValue(properties, nameof(RaygunIdentifierMessage));
     }
