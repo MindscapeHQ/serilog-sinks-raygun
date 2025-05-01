@@ -8,6 +8,7 @@ using System.Reflection;
 using Serilog.Core;
 using Serilog.Events;
 using Mindscape.Raygun4Net;
+using Mindscape.Raygun4Net.Messages;
 
 namespace Serilog.Sinks.Raygun;
 
@@ -22,10 +23,12 @@ public class RaygunClientSink : ILogEventSink
     private const string OccurredProperty = "RaygunSink_OccurredOn";
     private const string RaygunRequestMessagePropertyName = "RaygunSink_RequestMessage";
     private const string RaygunResponseMessagePropertyName = "RaygunSink_ResponseMessage";
+    private const string RaygunUserInfoPropertyName = "RaygunSink_UserInfo";
 
     private readonly IFormatProvider? _formatProvider;
     private readonly IEnumerable<string> _tags;
     private readonly string _tagsProperty;
+    private readonly Func<LogEvent, RaygunIdentifierMessage?>? _userInfoCallback;
 
     private readonly RaygunClientBase _raygunClient;
 
@@ -36,17 +39,20 @@ public class RaygunClientSink : ILogEventSink
     /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
     /// <param name="tags">Specifies the tags to include with every log message. The log level will always be included as a tag.</param>
     /// <param name="tagsProperty">The property where additional tags are stored when emitting log events.</param>
+    /// <param name="userInfoCallback">A function to extract user information from the log event.</param>
     public RaygunClientSink(RaygunClientBase raygunClient,
         IFormatProvider? formatProvider = null,
         IEnumerable<string>? tags = null,
-        string tagsProperty = "Tags"
+        string tagsProperty = "Tags",
+        Func<LogEvent, RaygunIdentifierMessage?>? userInfoCallback = null
     )
     {
         _raygunClient = raygunClient;
         _formatProvider = formatProvider;
         _tags = tags ?? Array.Empty<string>();
         _tagsProperty = tagsProperty;
-        
+        _userInfoCallback = userInfoCallback;
+
         _raygunClient.CustomGroupingKey += OnCustomGroupingKey;
 
         // Raygun4Net adds these two wrapper exceptions by default, but as there is no way to remove them through this Serilog sink, we replace them entirely with the configured wrapper exceptions.
@@ -69,6 +75,16 @@ public class RaygunClientSink : ILogEventSink
         properties[LogMessageTemplateProperty] = new ScalarValue(logEvent.MessageTemplate.Text);
         properties[OccurredProperty] = new ScalarValue(logEvent.Timestamp.UtcDateTime);
         
+        // Add user info if callback is provided
+        if (_userInfoCallback != null)
+        {
+            var userInfo = _userInfoCallback(logEvent);
+            if (userInfo != null)
+            {
+                properties[RaygunUserInfoPropertyName] = BuildUserInfoStructureValue(userInfo);
+            }
+        }
+
         // Add additional custom tags
         if (properties.TryGetValue(_tagsProperty, out var eventTags) && eventTags is SequenceValue tagsSequence)
         {
@@ -143,7 +159,16 @@ public class RaygunClientSink : ILogEventSink
                     details.Response = BuildResponseMessageFromStructureValue(responseMessageValue);
                     properties.Remove(RaygunResponseMessagePropertyName);
                 }
-    
+
+                // Add UserInfo if present and not already set
+                if (details.User == null &&
+                    properties.TryGetValue(RaygunUserInfoPropertyName, out var userInfoProperty) &&
+                    userInfoProperty is StructureValue userInfoValue)
+                {
+                    details.User = BuildUserInfoFromStructureValue(userInfoValue);
+                    properties.Remove(RaygunUserInfoPropertyName);
+                }
+
                 // Simplify the remaining properties to be used as user-custom-data
                 details.UserCustomData = properties
                     .Select(pv => new { Name = pv.Key, Value = RaygunPropertyFormatter.Simplify(pv.Value) })
@@ -232,6 +257,58 @@ public class RaygunClientSink : ILogEventSink
         }
 
         return requestMessage;
+    }
+
+    private static StructureValue BuildUserInfoStructureValue(RaygunIdentifierMessage userInfo)
+    {
+        var properties = new List<LogEventProperty>();
+
+        if (userInfo.Identifier != null)
+            properties.Add(new LogEventProperty(nameof(RaygunIdentifierMessage.Identifier), new ScalarValue(userInfo.Identifier)));
+        properties.Add(new LogEventProperty(nameof(RaygunIdentifierMessage.IsAnonymous), new ScalarValue(userInfo.IsAnonymous)));
+        if (userInfo.Email != null)
+            properties.Add(new LogEventProperty(nameof(RaygunIdentifierMessage.Email), new ScalarValue(userInfo.Email)));
+        if (userInfo.FullName != null)
+            properties.Add(new LogEventProperty(nameof(RaygunIdentifierMessage.FullName), new ScalarValue(userInfo.FullName)));
+        if (userInfo.FirstName != null)
+            properties.Add(new LogEventProperty(nameof(RaygunIdentifierMessage.FirstName), new ScalarValue(userInfo.FirstName)));
+        if (userInfo.UUID != null)
+            properties.Add(new LogEventProperty(nameof(RaygunIdentifierMessage.UUID), new ScalarValue(userInfo.UUID)));
+
+        return new StructureValue(properties, nameof(RaygunIdentifierMessage));
+    }
+
+    // Added helper method to convert StructureValue back to RaygunIdentifierMessage
+    private static RaygunIdentifierMessage BuildUserInfoFromStructureValue(StructureValue userInfoStructure)
+    {
+        var userInfo = new RaygunIdentifierMessage(null); // Initialize with null identifier
+
+        foreach (var property in userInfoStructure.Properties)
+        {
+            switch (property.Name)
+            {
+                case nameof(RaygunIdentifierMessage.Identifier):
+                    userInfo.Identifier = property.AsString();
+                    break;
+                case nameof(RaygunIdentifierMessage.IsAnonymous):
+                    userInfo.IsAnonymous = property.AsBoolean();
+                    break;
+                case nameof(RaygunIdentifierMessage.Email):
+                    userInfo.Email = property.AsString();
+                    break;
+                case nameof(RaygunIdentifierMessage.FullName):
+                    userInfo.FullName = property.AsString();
+                    break;
+                case nameof(RaygunIdentifierMessage.FirstName):
+                    userInfo.FirstName = property.AsString();
+                    break;
+                case nameof(RaygunIdentifierMessage.UUID):
+                    userInfo.UUID = property.AsString();
+                    break;
+            }
+        }
+
+        return userInfo;
     }
 }
 #endif
