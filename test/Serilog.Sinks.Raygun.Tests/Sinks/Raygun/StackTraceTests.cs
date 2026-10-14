@@ -1,10 +1,8 @@
+#if !NETFRAMEWORK
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Mindscape.Raygun4Net;
-#if NETFRAMEWORK
-using Mindscape.Raygun4Net.Messages;
-#endif
 using NUnit.Framework;
 using RaygunSinkRegressionTests;
 using Serilog.Core;
@@ -19,16 +17,10 @@ namespace Serilog.Sinks.Raygun.Tests.Sinks.Raygun
         private const string ApiKey = "test-api-key";
 
         [TestCase(false, TestName = "RaygunSink_MessageOnlyLogIncludesSourceFileAndLine")]
-#if !NETFRAMEWORK
         [TestCase(true, TestName = "RaygunClientSink_MessageOnlyLogIncludesSourceFileAndLine")]
-#endif
         public void MessageOnlyLogIncludesSourceFileAndLine(bool useRaygunClientSink)
         {
-#if NETFRAMEWORK
-            var client = new RaygunClient(ApiKey);
-#else
             var client = new RaygunClient(new RaygunSettings { ApiKey = ApiKey });
-#endif
             RaygunMessage capturedMessage = null;
             client.SendingMessage += (sender, arguments) =>
             {
@@ -37,13 +29,11 @@ namespace Serilog.Sinks.Raygun.Tests.Sinks.Raygun
             };
 
             ILogEventSink sink;
-#if !NETFRAMEWORK
             if (useRaygunClientSink)
             {
                 sink = new RaygunClientSink(client);
             }
             else
-#endif
             {
                 sink = new RaygunSink(
                     formatProvider: null,
@@ -127,3 +117,4 @@ namespace RaygunSinkRegressionTests
         public int LineNumber { get; }
     }
 }
+#endif
