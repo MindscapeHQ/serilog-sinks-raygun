@@ -1,5 +1,10 @@
 # Full Change Log for Serilog.Sinks.Raygun package
 
+### Unreleased
+
+- Fixed missing source filenames and line numbers for logs without an exception in `RaygunSink` and `RaygunClientSink` when matching symbols are available ([#75](https://github.com/MindscapeHQ/serilog-sinks-raygun/pull/75)).
+- Updated the build SDK, .NET unit tests, and sample apps to .NET 10.
+
 ### v8.2.0
 - Updated `RaygunClientSink` to support extracting "Tags" from emitted log event properties
 - See: https://github.com/MindscapeHQ/serilog-sinks-raygun/pull/73
