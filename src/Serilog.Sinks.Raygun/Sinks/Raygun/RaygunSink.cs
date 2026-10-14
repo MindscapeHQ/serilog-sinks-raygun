@@ -285,7 +285,7 @@ public class RaygunSink : ILogEventSink
 
     private static StackTrace GetCurrentExecutionStackTrace()
     {
-        var stackTrace = new StackTrace();
+        var stackTrace = new StackTrace(fNeedFileInfo: true);
 
         for (var frameIndex = 0; frameIndex < stackTrace.FrameCount; frameIndex++)
         {
@@ -294,7 +294,7 @@ public class RaygunSink : ILogEventSink
 
             if (!className.StartsWith("Serilog."))
             {
-                return new StackTrace(frameIndex);
+                return new StackTrace(frameIndex, fNeedFileInfo: true);
             }
         }
 
