@@ -99,15 +99,16 @@ public class RaygunClientSink : ILogEventSink
         {
             var details = e.Message.Details;
     
-            details.Client = new RaygunClientMessage
-            {
-                Name = "RaygunSerilogSink",
-                Version = GetType().Assembly.GetName().Version?.ToString() ?? string.Empty,
-                ClientUrl = "https://github.com/serilog/serilog-sinks-raygun"
-            };
-    
+            // The client may be shared with other code, so only change messages that this sink sent
             if (details.UserCustomData is Dictionary<string, LogEventPropertyValue> properties)
             {
+                details.Client = new RaygunClientMessage
+                {
+                    Name = "RaygunSerilogSink",
+                    Version = GetType().Assembly.GetName().Version?.ToString() ?? string.Empty,
+                    ClientUrl = "https://github.com/serilog/serilog-sinks-raygun"
+                };
+
                 // If an Exception has not been provided, then use the log message/template to fill in the details and attach the current execution stack
                 if (e.Exception is NullException nullException)
                 {
