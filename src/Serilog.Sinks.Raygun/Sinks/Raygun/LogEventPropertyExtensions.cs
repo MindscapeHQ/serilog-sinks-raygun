@@ -22,6 +22,11 @@ public static class LogEventPropertyExtensions
         return property.Value.AsString();
     }
 
+    public static bool AsBoolean(this LogEventProperty property)
+    {
+        return property.Value.AsString().ToLower() == "true";
+    }
+
     public static int AsInteger(this LogEventProperty property, int defaultIfNull = 0)
     {
         var scalar = property.Value as ScalarValue;
