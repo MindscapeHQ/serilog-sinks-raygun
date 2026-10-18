@@ -1,6 +1,7 @@
 #if !NETFRAMEWORK
 using System;
 using System.Linq;
+using System.Reflection;
 using Mindscape.Raygun4Net;
 using NUnit.Framework;
 using Serilog.Events;
@@ -43,6 +44,22 @@ namespace Serilog.Sinks.Raygun.Tests.Sinks.Raygun
         }
 
         [Test]
+        public void SinkReportsUnwrapTargetInvocationException()
+        {
+            var sink = new RaygunClientSink(_client);
+
+            sink.Emit(new LogEvent(
+                DateTimeOffset.UtcNow,
+                LogEventLevel.Fatal,
+                new TargetInvocationException(new InvalidOperationException("inner")),
+                new MessageTemplateParser().Parse("Sink failure"),
+                Enumerable.Empty<LogEventProperty>()));
+
+            Assert.AreEqual(typeof(InvalidOperationException).FullName, _capturedMessage.Details.Error.ClassName);
+            Assert.AreEqual("RaygunSerilogSink", _capturedMessage.Details.Client.Name);
+        }
+
+        [Test]
         public void OtherReportsKeepClientDetails()
         {
             _client.SendAsync(new InvalidOperationException("before"), null, null).GetAwaiter().GetResult();
@@ -52,6 +69,17 @@ namespace Serilog.Sinks.Raygun.Tests.Sinks.Raygun
             _client.SendAsync(new InvalidOperationException("after"), null, null).GetAwaiter().GetResult();
 
             Assert.AreEqual(expectedName, _capturedMessage.Details.Client.Name);
+        }
+
+        [Test]
+        public void OtherReportsKeepDefaultWrapperExceptions()
+        {
+            _ = new RaygunClientSink(_client);
+
+            _client.SendAsync(new TargetInvocationException(new InvalidOperationException("inner")), null, null)
+                .GetAwaiter().GetResult();
+
+            Assert.AreEqual(typeof(InvalidOperationException).FullName, _capturedMessage.Details.Error.ClassName);
         }
     }
 }

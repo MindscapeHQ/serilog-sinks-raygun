@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using Serilog.Core;
 using Serilog.Events;
 using Mindscape.Raygun4Net;
@@ -48,10 +47,6 @@ public class RaygunClientSink : ILogEventSink
         _tagsProperty = tagsProperty;
         
         _raygunClient.CustomGroupingKey += OnCustomGroupingKey;
-
-        // Raygun4Net adds these two wrapper exceptions by default, but as there is no way to remove them through this Serilog sink, we replace them entirely with the configured wrapper exceptions.
-        _raygunClient.RemoveWrapperExceptions(typeof(TargetInvocationException),
-            Type.GetType("System.Web.HttpUnhandledException, System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"));
     }
 
     /// <summary>

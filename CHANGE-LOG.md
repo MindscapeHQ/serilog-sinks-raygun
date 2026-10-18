@@ -5,6 +5,7 @@
 - Fixed missing source filenames and line numbers for logs without an exception in `RaygunSink` and `RaygunClientSink` when matching symbols are available ([#75](https://github.com/MindscapeHQ/serilog-sinks-raygun/pull/75)).
 - Updated the build SDK, .NET unit tests, and sample apps to .NET 10.
 - Fixed `RaygunClientSink` setting `RaygunSerilogSink` as the client name on reports from the supplied `RaygunClient` that did not come from Serilog ([#77](https://github.com/MindscapeHQ/serilog-sinks-raygun/issues/77)).
+- Changed `RaygunClientSink` to stop removing the default `TargetInvocationException` wrapper exception from the supplied `RaygunClient`. Log events with a `TargetInvocationException` are now grouped by the inner exception, and the caller can configure wrapper exceptions on its own client ([#77](https://github.com/MindscapeHQ/serilog-sinks-raygun/issues/77)).
 
 ### v8.2.0
 - Updated `RaygunClientSink` to support extracting "Tags" from emitted log event properties
