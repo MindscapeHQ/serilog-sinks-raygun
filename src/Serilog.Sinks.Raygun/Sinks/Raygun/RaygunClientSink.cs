@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using Serilog.Core;
 using Serilog.Events;
 using Mindscape.Raygun4Net;
@@ -48,10 +47,6 @@ public class RaygunClientSink : ILogEventSink
         _tagsProperty = tagsProperty;
         
         _raygunClient.CustomGroupingKey += OnCustomGroupingKey;
-
-        // Raygun4Net adds these two wrapper exceptions by default, but as there is no way to remove them through this Serilog sink, we replace them entirely with the configured wrapper exceptions.
-        _raygunClient.RemoveWrapperExceptions(typeof(TargetInvocationException),
-            Type.GetType("System.Web.HttpUnhandledException, System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"));
     }
 
     /// <summary>
@@ -99,15 +94,16 @@ public class RaygunClientSink : ILogEventSink
         {
             var details = e.Message.Details;
     
-            details.Client = new RaygunClientMessage
-            {
-                Name = "RaygunSerilogSink",
-                Version = GetType().Assembly.GetName().Version?.ToString() ?? string.Empty,
-                ClientUrl = "https://github.com/serilog/serilog-sinks-raygun"
-            };
-    
+            // The client may be shared with other code, so only change messages that this sink sent
             if (details.UserCustomData is Dictionary<string, LogEventPropertyValue> properties)
             {
+                details.Client = new RaygunClientMessage
+                {
+                    Name = "RaygunSerilogSink",
+                    Version = GetType().Assembly.GetName().Version?.ToString() ?? string.Empty,
+                    ClientUrl = "https://github.com/serilog/serilog-sinks-raygun"
+                };
+
                 // If an Exception has not been provided, then use the log message/template to fill in the details and attach the current execution stack
                 if (e.Exception is NullException nullException)
                 {
